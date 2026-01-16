@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { loadingTracker } from "./loading";
 
@@ -205,6 +204,33 @@ export const analyzeBiometrics = async (base64Image: string) => {
     return parsed;
   } catch (err) {
     throw new NeuralLinkError("Optical biometric core failed to resolve specimen data.", "BIO_SCAN_FAIL");
+  } finally {
+    loadingTracker.end();
+  }
+};
+
+export const analyzeVideoKinetic = async (frames: string[]) => {
+  loadingTracker.start();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  try {
+    // FIX: Using spread to initialize parts ensures TypeScript allows both inlineData and text objects in the array.
+    const parts: any[] = [
+      ...frames.map(data => ({
+        inlineData: { mimeType: "image/jpeg", data }
+      })),
+      { 
+        text: "Analyze this sequence of video frames from a human performance node. Extract key kinetic information, biological optimization markers, and mechanical efficiency insights. Provide a high-tech briefing titled 'KINETIC PERFORMANCE AUDIT'." 
+      }
+    ];
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: [{ parts }],
+    });
+    return response.text || "DECODING FAILED: NO TELEMETRY EXTRACTED.";
+  } catch (err) {
+    console.error("Video analysis failed:", err);
+    throw new NeuralLinkError("Visual Intelligence Core overload. Video intel extraction failed.", "VIDEO_INTEL_FAIL");
   } finally {
     loadingTracker.end();
   }

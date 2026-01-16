@@ -7,9 +7,10 @@ interface HeaderProps {
   onOpenAssistant: () => void;
   onOpenCoach: () => void;
   onOpenProfile: () => void;
+  onOpenVideo: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenProfile }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenProfile, onOpenVideo }) => {
   return (
     <header className="fixed top-0 z-[80] w-full border-b border-white/10 bg-black/80 backdrop-blur-xl">
       <div className="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
@@ -21,6 +22,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenPro
         </div>
         
         <nav className="hidden lg:flex items-center gap-10">
+          <a onClick={() => { sounds.playClick(); onOpenVideo(); }} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer text-primary">
+            Kinetic Intel
+            <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary"></span>
+          </a>
           {['The Stacks', 'Optimization', 'Protocol Intel', 'Nodes'].map((item) => (
             <a 
               key={item}

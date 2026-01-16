@@ -10,6 +10,7 @@ import ProtocolStore from './components/ProtocolStore';
 import OptimizationAssistant from './components/OptimizationAssistant';
 import LiveCoach from './components/LiveCoach';
 import ProfileModal from './components/ProfileModal';
+import VideoAnalyzer from './components/VideoAnalyzer';
 import Footer from './components/Footer';
 import { sounds } from './services/ui-sounds';
 import { loadingTracker } from './services/loading';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
@@ -118,6 +120,7 @@ const App: React.FC = () => {
         onOpenAssistant={toggleAssistant} 
         onOpenCoach={toggleCoach}
         onOpenProfile={() => { sounds.playBlip(); setIsProfileOpen(true); }}
+        onOpenVideo={() => { sounds.playBlip(); setIsVideoOpen(true); }}
       />
       <IntelTicker />
       
@@ -202,6 +205,12 @@ const App: React.FC = () => {
           profile={userProfile}
           onSave={handleSaveProfile}
           onClose={() => setIsProfileOpen(false)}
+        />
+      )}
+
+      {isVideoOpen && (
+        <VideoAnalyzer 
+          onClose={() => setIsVideoOpen(false)}
         />
       )}
     </div>
