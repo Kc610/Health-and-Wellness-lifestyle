@@ -6,9 +6,10 @@ import { sounds } from '../services/ui-sounds';
 interface HeaderProps {
   onOpenAssistant: () => void;
   onOpenCoach: () => void;
+  onOpenProfile: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenProfile }) => {
   return (
     <header className="fixed top-0 z-[80] w-full border-b border-white/10 bg-black/80 backdrop-blur-xl">
       <div className="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
@@ -35,18 +36,18 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach }) => {
         
         <div className="flex items-center gap-6">
           <button 
+            onClick={() => { sounds.playBlip(); onOpenProfile(); }}
+            className="hidden sm:flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] border border-white/10 px-4 py-2 text-slate-400 hover:text-white hover:border-white/30 transition-all"
+          >
+            <span className="material-symbols-outlined text-lg">fingerprint</span>
+            BIO-DATA
+          </button>
+          <button 
             onClick={() => { sounds.playBlip(); onOpenCoach(); }}
             className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 text-primary hover:bg-primary hover:text-black transition-all"
           >
             <span className="material-symbols-outlined text-lg">settings_voice</span>
             NEURAL LINK
-          </button>
-          <button 
-            onClick={() => { sounds.playBlip(); onOpenAssistant(); }}
-            className="hidden md:flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400 hover:text-white transition-colors"
-          >
-            <span className="material-symbols-outlined text-lg">terminal</span>
-            SYNC AGENT
           </button>
           <button 
             onClick={() => sounds.playClick()}

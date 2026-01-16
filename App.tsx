@@ -9,13 +9,36 @@ import IntelligenceGrid from './components/IntelligenceGrid';
 import ProtocolStore from './components/ProtocolStore';
 import OptimizationAssistant from './components/OptimizationAssistant';
 import LiveCoach from './components/LiveCoach';
+import ProfileModal from './components/ProfileModal';
 import Footer from './components/Footer';
 import { sounds } from './services/ui-sounds';
+import { loadingTracker } from './services/loading';
+import { UserProfile } from './types';
+
+const INITIAL_PROFILE: UserProfile = {
+  age: '',
+  weight: '',
+  height: '',
+  activityLevel: 'moderate',
+  goals: ''
+};
 
 const App: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem('bio_baseline');
+    return saved ? JSON.parse(saved) : INITIAL_PROFILE;
+  });
+
+  useEffect(() => {
+    return loadingTracker.subscribe((loading) => {
+      setIsGlobalLoading(loading);
+    });
+  }, []);
 
   const handleStart = () => {
     sounds.playInject();
@@ -33,8 +56,29 @@ const App: React.FC = () => {
     setIsCoachOpen(!isCoachOpen);
   };
 
+  const handleSaveProfile = (profile: UserProfile) => {
+    setUserProfile(profile);
+    localStorage.setItem('bio_baseline', JSON.stringify(profile));
+  };
+
   return (
     <div className="relative min-h-screen">
+      {/* Global Neural Link Loader */}
+      <div className={`fixed top-0 left-0 w-full h-[2px] z-[1000] overflow-hidden pointer-events-none transition-opacity duration-300 ${isGlobalLoading ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="absolute inset-0 bg-primary/20"></div>
+        <div className="absolute inset-0 bg-primary shadow-[0_0_10px_#00FF7F] animate-shimmer"></div>
+      </div>
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite linear;
+          width: 40%;
+        }
+      `}</style>
+
       {!isInitialized && (
         <div className="fixed inset-0 z-[500] bg-black flex flex-col items-center justify-center p-8">
           <div className="max-w-md w-full text-center space-y-12">
@@ -73,6 +117,7 @@ const App: React.FC = () => {
       <Header 
         onOpenAssistant={toggleAssistant} 
         onOpenCoach={toggleCoach}
+        onOpenProfile={() => { sounds.playBlip(); setIsProfileOpen(true); }}
       />
       <IntelTicker />
       
@@ -146,7 +191,18 @@ const App: React.FC = () => {
       )}
 
       {isCoachOpen && (
-        <LiveCoach onClose={() => setIsCoachOpen(false)} />
+        <LiveCoach 
+          profile={userProfile}
+          onClose={() => setIsCoachOpen(false)} 
+        />
+      )}
+
+      {isProfileOpen && (
+        <ProfileModal 
+          profile={userProfile}
+          onSave={handleSaveProfile}
+          onClose={() => setIsProfileOpen(false)}
+        />
       )}
     </div>
   );

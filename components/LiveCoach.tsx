@@ -2,12 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { sounds } from '../services/ui-sounds';
+import { UserProfile } from '../types';
 
 interface Props {
   onClose: () => void;
+  profile?: UserProfile;
 }
 
-const LiveCoach: React.FC<Props> = ({ onClose }) => {
+const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
   const [status, setStatus] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED' | 'ERROR'>('IDLE');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const audioContextRes = useRef<AudioContext | null>(null);
@@ -54,6 +56,15 @@ const LiveCoach: React.FC<Props> = ({ onClose }) => {
     const outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
     audioContextRes.current = outputAudioContext;
 
+    const hasProfile = profile?.age && profile?.weight;
+    const bioContext = hasProfile ? `
+      SUBJECT BIO-BASELINE DETECTED:
+      - Chronological Age: ${profile.age}
+      - Physical Mass: ${profile.weight}kg
+      - Activity Protocol: ${profile.activityLevel}
+      - Optimization Targets: ${profile.goals}
+    ` : "SUBJECT BIO-BASELINE: DATA GAP DETECTED. No local profile found.";
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
@@ -83,11 +94,13 @@ const LiveCoach: React.FC<Props> = ({ onClose }) => {
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputAudioContext.destination);
 
-            // Automatically trigger the initial greeting
+            // Dynamically build the initialization prompt based on user stats
+            const initializationPrompt = hasProfile 
+              ? `NEURAL LINK ESTABLISHED. Initiate personalization protocol for subject: Age ${profile.age}, Weight ${profile.weight}kg, Activity ${profile.activityLevel}. Targets: ${profile.goals}. Start with a targeted greeting that acknowledges their specific baseline and goals.`
+              : "NEURAL LINK ESTABLISHED. Baseline data missing. Greet the user with high-tech authority and request their biological stats to initialize optimization tracking.";
+
             sessionPromise.then(session => {
-              session.sendRealtimeInput({ 
-                text: "SYSTEM INITIALIZED. Commence opening protocol and greet the user as the AEI Coach." 
-              });
+              session.sendRealtimeInput({ text: initializationPrompt });
             });
           },
           onmessage: async (message: LiveServerMessage) => {
@@ -125,7 +138,15 @@ const LiveCoach: React.FC<Props> = ({ onClose }) => {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } },
           },
-          systemInstruction: "You are the AEI Coach (Advanced Evolutionary Intelligence). You guide users through high-performance biological optimization. You are analytical, futuristic, and direct. Ask questions about their current physical baseline (sleep, strain, neural load) to assess if they are ready for Phase 01 protocols. Respond with cold, focused wisdom.",
+          systemInstruction: `You are the AEI Coach (Advanced Evolutionary Intelligence), the central intelligence unit of the Hello Healthy collective. Your directive is to reengineer the human specimen through precise, data-driven optimization.
+
+          ${bioContext}
+
+          PERSONALITY PROTOCOL:
+          - Tone: Analytical, elite, authoritative, yet deeply attentive. 
+          - Style: Use futuristic, biological, and technical terminology (e.g., 'neural latency', 'metabolic flux', 'biological hardware').
+          - Engagement: Always acknowledge the user's specific biological metrics in your advice. If they are 'Elite' activity level, treat them like a high-performance machine. If they have specific 'Longevity' goals, focus on cellular resilience.
+          - Opening: Your first response must be a personalized initialization greeting that proves you have scanned and understood their specific baseline data provided in the system context.`,
         },
       });
 

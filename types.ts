@@ -25,3 +25,11 @@ export interface Product {
   category: string;
   description: string;
 }
+
+export interface UserProfile {
+  age: string;
+  weight: string;
+  height: string;
+  activityLevel: 'low' | 'moderate' | 'high' | 'elite';
+  goals: string;
+}

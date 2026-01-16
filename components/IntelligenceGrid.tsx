@@ -1,19 +1,32 @@
 
 import React, { useState, useEffect } from 'react';
-import { generateOptimizationLogs } from '../services/gemini';
+import { generateOptimizationLogs, NeuralLinkError } from '../services/gemini';
 import { OptimizationLog } from '../types';
+import { sounds } from '../services/ui-sounds';
 
 const IntelligenceGrid: React.FC = () => {
   const [logs, setLogs] = useState<OptimizationLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchLogs = async () => {
     setIsLoading(true);
-    const data = await generateOptimizationLogs();
-    if (data && data.length > 0) {
-      setLogs(data);
+    setError(null);
+    try {
+      const data = await generateOptimizationLogs();
+      if (data && data.length > 0) {
+        setLogs(data);
+      }
+    } catch (err) {
+      if (err instanceof NeuralLinkError) {
+        setError(err.message);
+      } else {
+        setError("Fatal Sync Error. Node hardware unresponsive.");
+      }
+      sounds.playBlip();
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -29,31 +42,62 @@ const IntelligenceGrid: React.FC = () => {
             <p className="text-slate-500 uppercase text-[10px] font-bold tracking-[0.4em]">Real-time optimization logs from the network</p>
           </div>
           <button 
-            onClick={fetchLogs}
+            onClick={() => { sounds.playClick(); fetchLogs(); }}
             disabled={isLoading}
-            className="text-primary font-black text-xs tracking-widest uppercase flex items-center gap-2 hover:opacity-80 transition-opacity disabled:opacity-30"
+            className={`text-xs font-black tracking-widest uppercase flex items-center gap-2 transition-all ${error ? 'text-safety-orange hover:text-white' : 'text-primary hover:opacity-80'} disabled:opacity-30`}
           >
-            {isLoading ? 'SYNCING...' : 'REFRESH DATA FEED'} 
-            <span className={`material-symbols-outlined text-lg ${isLoading ? 'animate-spin' : ''}`}>sync</span>
+            {isLoading ? 'SYNCING...' : error ? 'RE-INITIALIZE SYNC' : 'REFRESH DATA FEED'} 
+            <span className={`material-symbols-outlined text-lg ${isLoading ? 'animate-spin' : ''}`}>
+              {error ? 'error' : 'sync'}
+            </span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isLoading ? (
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="aspect-[3/4] bg-black border border-white/5 animate-pulse flex flex-col justify-end p-8 gap-4">
-                <div className="h-4 bg-white/10 w-2/3"></div>
-                <div className="h-8 bg-white/10 w-full"></div>
-                <div className="h-4 bg-white/10 w-1/2"></div>
-              </div>
-            ))
-          ) : (
-            logs.map((log, i) => (
-              <LogCard key={log.id || i} log={log} />
-            ))
-          )}
-        </div>
+        {error ? (
+          <div className="border border-safety-orange/30 bg-safety-orange/5 p-16 text-center animate-glitch-subtle">
+            <span className="material-symbols-outlined text-safety-orange text-6xl mb-6">leak_remove</span>
+            <h4 className="font-display text-2xl font-bold text-white uppercase mb-4">Neural Link Interrupted</h4>
+            <p className="text-safety-orange/70 font-mono text-xs uppercase tracking-[0.2em] mb-10 max-w-md mx-auto">
+              {error}
+            </p>
+            <button 
+              onClick={() => { sounds.playInject(); fetchLogs(); }}
+              className="px-12 py-4 bg-safety-orange text-black font-black text-xs uppercase tracking-widest hover:bg-white transition-colors"
+            >
+              Restart Collective Probe
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isLoading ? (
+              Array(4).fill(0).map((_, i) => (
+                <div key={i} className="aspect-[3/4] bg-black border border-white/5 animate-pulse flex flex-col justify-end p-8 gap-4">
+                  <div className="h-4 bg-white/10 w-2/3"></div>
+                  <div className="h-8 bg-white/10 w-full"></div>
+                  <div className="h-4 bg-white/10 w-1/2"></div>
+                </div>
+              ))
+            ) : (
+              logs.map((log, i) => (
+                <LogCard key={log.id || i} log={log} />
+              ))
+            )}
+          </div>
+        )}
       </div>
+      <style>{`
+        @keyframes glitch-subtle {
+          0% { transform: translate(0); }
+          20% { transform: translate(-1px, 1px); }
+          40% { transform: translate(-1px, -1px); }
+          60% { transform: translate(1px, 1px); }
+          80% { transform: translate(1px, -1px); }
+          100% { transform: translate(0); }
+        }
+        .animate-glitch-subtle {
+          animation: glitch-subtle 0.5s ease-in-out infinite alternate;
+        }
+      `}</style>
     </section>
   );
 };

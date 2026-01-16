@@ -1,7 +1,18 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { loadingTracker } from "./loading";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+
+/**
+ * Custom Error for API interactions
+ */
+export class NeuralLinkError extends Error {
+  constructor(public message: string, public code: string) {
+    super(message);
+    this.name = 'NeuralLinkError';
+  }
+}
 
 /**
  * Helper to safely parse JSON from Gemini responses.
@@ -47,6 +58,7 @@ const decodeAudioData = async (data: Uint8Array, ctx: AudioContext, sampleRate: 
 };
 
 export const speakProtocol = async (text: string) => {
+  loadingTracker.start();
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
@@ -70,13 +82,17 @@ export const speakProtocol = async (text: string) => {
       source.connect(audioCtx.destination);
       return { source, audioCtx };
     }
+    throw new Error("No audio data returned");
   } catch (err) {
     console.error("TTS Synthesis failed:", err);
+    throw new NeuralLinkError("Neural voice link interrupted. Audio synthesis unavailable.", "VOICE_LINK_DOWN");
+  } finally {
+    loadingTracker.end();
   }
-  return null;
 };
 
 export const generateOptimizationLogs = async () => {
+  loadingTracker.start();
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -103,14 +119,18 @@ export const generateOptimizationLogs = async () => {
     });
 
     const parsed = safeParseJson(response.text);
-    return parsed || [];
+    if (!parsed) throw new Error("Malformed grid data");
+    return parsed;
   } catch (err) {
     console.error("Failed to fetch logs:", err);
-    return [];
+    throw new NeuralLinkError("Collective Intelligence Node timed out. Biological logs inaccessible.", "GRID_SYNC_FAIL");
+  } finally {
+    loadingTracker.end();
   }
 };
 
 export const generateProductIntel = async (productTitle: string, baseDescription: string) => {
+  loadingTracker.start();
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -121,11 +141,14 @@ export const generateProductIntel = async (productTitle: string, baseDescription
     });
     return response.text || "INTEL DECRYPTION FAILED. ACCESS DENIED.";
   } catch (err) {
-    return "NEURAL NODE TIMEOUT. RETRY PROTOCOL.";
+    throw new NeuralLinkError("Decryption core offline. Protocol briefing unavailable.", "INTEL_DECRYPT_FAIL");
+  } finally {
+    loadingTracker.end();
   }
 };
 
 export const generateIntelLeaks = async () => {
+  loadingTracker.start();
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -139,13 +162,18 @@ export const generateIntelLeaks = async () => {
       }
     });
     const parsed = safeParseJson(response.text);
-    return parsed || ["LINK STABLE", "NODES ACTIVE", "ENCRYPTED"];
+    if (!parsed) throw new Error("Invalid leak format");
+    return parsed;
   } catch (err) {
-    return ["LINK STABLE", "NODES ACTIVE", "ENCRYPTED"];
+    console.warn("Leak feed sync failed, using emergency buffer.");
+    return ["LINK STABLE", "NODES ACTIVE", "ENCRYPTED CHANNEL", "BUFFERING..."];
+  } finally {
+    loadingTracker.end();
   }
 };
 
 export const analyzeBiometrics = async (base64Image: string) => {
+  loadingTracker.start();
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -166,9 +194,13 @@ export const analyzeBiometrics = async (base64Image: string) => {
         }
       }
     });
-    return safeParseJson(response.text);
+    const parsed = safeParseJson(response.text);
+    if (!parsed) throw new Error("Analysis engine failed");
+    return parsed;
   } catch (err) {
-    return null;
+    throw new NeuralLinkError("Optical biometric core failed to resolve specimen data.", "BIO_SCAN_FAIL");
+  } finally {
+    loadingTracker.end();
   }
 };
 
