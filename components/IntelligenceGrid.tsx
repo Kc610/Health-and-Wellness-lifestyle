@@ -1,0 +1,97 @@
+
+import React, { useState, useEffect } from 'react';
+import { generateOptimizationLogs } from '../services/gemini';
+import { OptimizationLog } from '../types';
+
+const IntelligenceGrid: React.FC = () => {
+  const [logs, setLogs] = useState<OptimizationLog[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchLogs = async () => {
+    setIsLoading(true);
+    const data = await generateOptimizationLogs();
+    if (data && data.length > 0) {
+      setLogs(data);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  return (
+    <section className="py-32 bg-surface-dark relative overflow-hidden">
+      <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div>
+            <h3 className="font-display text-4xl font-bold mb-4 uppercase tracking-tighter">Collective Intelligence</h3>
+            <p className="text-slate-500 uppercase text-[10px] font-bold tracking-[0.4em]">Real-time optimization logs from the network</p>
+          </div>
+          <button 
+            onClick={fetchLogs}
+            disabled={isLoading}
+            className="text-primary font-black text-xs tracking-widest uppercase flex items-center gap-2 hover:opacity-80 transition-opacity disabled:opacity-30"
+          >
+            {isLoading ? 'SYNCING...' : 'REFRESH DATA FEED'} 
+            <span className={`material-symbols-outlined text-lg ${isLoading ? 'animate-spin' : ''}`}>sync</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {isLoading ? (
+            Array(4).fill(0).map((_, i) => (
+              <div key={i} className="aspect-[3/4] bg-black border border-white/5 animate-pulse flex flex-col justify-end p-8 gap-4">
+                <div className="h-4 bg-white/10 w-2/3"></div>
+                <div className="h-8 bg-white/10 w-full"></div>
+                <div className="h-4 bg-white/10 w-1/2"></div>
+              </div>
+            ))
+          ) : (
+            logs.map((log, i) => (
+              <LogCard key={log.id || i} log={log} />
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const LogCard: React.FC<{ log: OptimizationLog }> = ({ log }) => {
+  return (
+    <div className="group relative aspect-[3/4] overflow-hidden bg-black border border-white/5 hover:border-primary/40 transition-all duration-500">
+      <img 
+        alt="Biological visualization" 
+        className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-[2000ms]" 
+        src={`https://picsum.photos/seed/${log.id}/600/800?grayscale`}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+      
+      <div className="absolute top-4 left-4">
+        <span className="px-3 py-1 bg-primary text-black text-[9px] font-black uppercase tracking-wider">
+          {log.nodeType}
+        </span>
+      </div>
+
+      <div className="absolute bottom-6 left-6 right-6 translate-y-2 group-hover:translate-y-0 transition-transform">
+        <p className="text-[10px] font-black uppercase text-primary mb-2 tracking-[0.2em]">{log.category}</p>
+        <h5 className="text-3xl font-display font-bold mb-4 tracking-tighter">
+          {log.value} <span className="block text-[10px] font-normal text-slate-400 uppercase tracking-widest mt-1">{log.metric}</span>
+        </h5>
+        
+        <div className="flex items-center gap-3 border-t border-white/10 pt-4">
+          <div className="size-8 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center">
+             <span className="material-symbols-outlined text-sm text-primary">person</span>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold tracking-widest text-slate-100 uppercase">{log.user}</p>
+            <p className="text-[9px] font-bold tracking-widest text-slate-500 uppercase">{log.location}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default IntelligenceGrid;

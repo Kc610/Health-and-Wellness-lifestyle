@@ -1,0 +1,8 @@
+{
+  "name": "Hello Healthy",
+  "description": "A high-performance biological optimization platform featuring AI-driven intel leaks, real-time node monitoring, and a neural optimization assistant.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
