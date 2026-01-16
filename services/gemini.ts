@@ -1,19 +1,16 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Modality } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 /**
- * Helper to safely parse JSON from Gemini responses, 
- * handling potential markdown wrapping or undefined text.
+ * Helper to safely parse JSON from Gemini responses.
  */
 const safeParseJson = (text: string | undefined) => {
   if (!text) return null;
   try {
-    // Attempt direct parse
     return JSON.parse(text);
   } catch (e) {
-    // If it fails, try to extract JSON block
     const jsonMatch = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
     if (jsonMatch) {
       try {
@@ -24,6 +21,59 @@ const safeParseJson = (text: string | undefined) => {
     }
     return null;
   }
+};
+
+/**
+ * PCM Audio Decoding utilities
+ */
+const decodeBase64 = (base64: string) => {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+};
+
+const decodeAudioData = async (data: Uint8Array, ctx: AudioContext, sampleRate: number): Promise<AudioBuffer> => {
+  const dataInt16 = new Int16Array(data.buffer);
+  const frameCount = dataInt16.length;
+  const buffer = ctx.createBuffer(1, frameCount, sampleRate);
+  const channelData = buffer.getChannelData(0);
+  for (let i = 0; i < frameCount; i++) {
+    channelData[i] = dataInt16[i] / 32768.0;
+  }
+  return buffer;
+};
+
+export const speakProtocol = async (text: string) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts",
+      contents: [{ parts: [{ text: `Read this protocol intel briefing with focused, elite authority: ${text}` }] }],
+      config: {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: 'Zephyr' },
+          },
+        },
+      },
+    });
+
+    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (base64Audio) {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      const audioBuffer = await decodeAudioData(decodeBase64(base64Audio), audioCtx, 24000);
+      const source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioCtx.destination);
+      return { source, audioCtx };
+    }
+  } catch (err) {
+    console.error("TTS Synthesis failed:", err);
+  }
+  return null;
 };
 
 export const generateOptimizationLogs = async () => {
@@ -39,12 +89,12 @@ export const generateOptimizationLogs = async () => {
             type: Type.OBJECT,
             properties: {
               id: { type: Type.STRING },
-              nodeType: { type: Type.STRING, description: "e.g., Level 4 Node, Founder Class, Elite Member" },
-              category: { type: Type.STRING, description: "e.g., VO2 Max, Neural Latency, Hormone Profile" },
-              metric: { type: Type.STRING, description: "Short description of the gain, e.g., Net Gain, Response Time" },
-              value: { type: Type.STRING, description: "Numeric or status value, e.g., +12.4%, -40ms, Optimized" },
-              user: { type: Type.STRING, description: "Initial and Lastname, e.g., A. Volkov" },
-              location: { type: Type.STRING, description: "City name" }
+              nodeType: { type: Type.STRING },
+              category: { type: Type.STRING },
+              metric: { type: Type.STRING },
+              value: { type: Type.STRING },
+              user: { type: Type.STRING },
+              location: { type: Type.STRING }
             },
             required: ["id", "nodeType", "category", "metric", "value", "user", "location"]
           }
@@ -79,7 +129,7 @@ export const generateIntelLeaks = async () => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: "Generate 10 short, futuristic 'intel leaks' for a bio-hacking collective. Phrases should be short, cryptic, and high-tech. Example: 'Protocol 9-A finalized in Zurich node.' or 'Myostatin patch 2.4 showing 15% strength gains.'",
+      contents: "Generate 10 short, futuristic 'intel leaks'. Phrases should be short, cryptic, and high-tech.",
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -100,15 +150,8 @@ export const analyzeBiometrics = async (base64Image: string) => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [
-        {
-          inlineData: {
-            mimeType: "image/jpeg",
-            data: base64Image
-          }
-        },
-        {
-          text: "Analyze this specimen for biological optimization potential. Return a JSON object with 'geneticTier' (e.g. Founder, Elite, Vanguard), 'neuralLatency' (e.g. 10ms), 'metabolicEfficiency' (percentage), and a 1-sentence 'protocolRecommendation' that is high-tech and intense."
-        }
+        { inlineData: { mimeType: "image/jpeg", data: base64Image } },
+        { text: "Analyze this specimen for biological optimization potential. Return JSON." }
       ],
       config: {
         responseMimeType: "application/json",
@@ -119,14 +162,12 @@ export const analyzeBiometrics = async (base64Image: string) => {
             neuralLatency: { type: Type.STRING },
             metabolicEfficiency: { type: Type.STRING },
             protocolRecommendation: { type: Type.STRING }
-          },
-          required: ["geneticTier", "neuralLatency", "metabolicEfficiency", "protocolRecommendation"]
+          }
         }
       }
     });
     return safeParseJson(response.text);
   } catch (err) {
-    console.error("Biometric analysis error:", err);
     return null;
   }
 };
@@ -135,7 +176,7 @@ export const createOptimizationChat = () => {
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: "You are the Human Evolution Collective's Chief Optimization Agent. Your persona is professional, analytical, high-performance, and futuristic. You speak in terms of biological hardware, software patches, neural sync, and metabolic efficiency. Your goal is to provide concise, data-driven bio-hacking advice to elite members. Reject mediocrity. If the user mentions a baseline health metric, suggest an aggressive optimization path.",
+      systemInstruction: "You are the Hello Healthy Chief Optimization Agent. Professional, analytical, high-performance persona. Goal: biological optimization advice.",
     }
   });
 };

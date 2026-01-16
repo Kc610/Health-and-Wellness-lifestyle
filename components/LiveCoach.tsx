@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
+import { sounds } from '../services/ui-sounds';
 
 interface Props {
   onClose: () => void;
@@ -61,6 +62,7 @@ const LiveCoach: React.FC<Props> = ({ onClose }) => {
         callbacks: {
           onopen: () => {
             setStatus('CONNECTED');
+            sounds.playInject();
             const source = inputAudioContext.createMediaStreamSource(stream);
             const scriptProcessor = inputAudioContext.createScriptProcessor(4096, 1, 1);
             
@@ -80,6 +82,13 @@ const LiveCoach: React.FC<Props> = ({ onClose }) => {
 
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputAudioContext.destination);
+
+            // Automatically trigger the initial greeting
+            sessionPromise.then(session => {
+              session.sendRealtimeInput({ 
+                text: "SYSTEM INITIALIZED. Commence opening protocol and greet the user as the AEI Coach." 
+              });
+            });
           },
           onmessage: async (message: LiveServerMessage) => {
             const audioData = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
@@ -138,7 +147,10 @@ const LiveCoach: React.FC<Props> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in">
       <div className="absolute top-8 right-8">
-        <button onClick={onClose} className="text-white/40 hover:text-primary transition-colors">
+        <button 
+          onClick={() => { sounds.playClick(); onClose(); }} 
+          className="text-white/40 hover:text-primary transition-colors"
+        >
           <span className="material-symbols-outlined text-4xl">close</span>
         </button>
       </div>

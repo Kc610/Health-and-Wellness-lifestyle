@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Product } from '../types';
-import { generateProductIntel } from '../services/gemini';
+import { generateProductIntel, speakProtocol } from '../services/gemini';
+import { sounds } from '../services/ui-sounds';
 
 const PRODUCTS: Product[] = [
   {
@@ -82,8 +83,11 @@ const ProtocolStore: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [intelReport, setIntelReport] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
   const handleDecompile = async (product: Product) => {
+    sounds.playInject();
     setSelectedProduct(product);
     setIsGenerating(true);
     setIntelReport(null);
@@ -95,6 +99,33 @@ const ProtocolStore: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleSpeak = async () => {
+    if (!intelReport || isSpeaking) return;
+    sounds.playBlip();
+    setIsSpeaking(true);
+    const playback = await speakProtocol(intelReport);
+    if (playback) {
+      currentAudioSource.current = playback.source;
+      playback.source.start(0);
+      playback.source.onended = () => {
+        setIsSpeaking(false);
+        currentAudioSource.current = null;
+      };
+    } else {
+      setIsSpeaking(false);
+    }
+  };
+
+  const closeModal = () => {
+    sounds.playClick();
+    if (currentAudioSource.current) {
+      currentAudioSource.current.stop();
+    }
+    setSelectedProduct(null);
+    setIntelReport(null);
+    setIsSpeaking(false);
   };
 
   return (
@@ -150,10 +181,10 @@ const ProtocolStore: React.FC = () => {
       {/* Intel Modal */}
       {selectedProduct && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8">
-          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedProduct(null)}></div>
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={closeModal}></div>
           <div className="relative w-full max-w-4xl bg-surface-dark border border-primary/30 p-8 md:p-16 shadow-[0_0_150px_rgba(0,255,127,0.15)] overflow-y-auto max-h-[95vh]">
             <div className="absolute top-4 right-4">
-               <button onClick={() => setSelectedProduct(null)} className="text-white/40 hover:text-white transition-colors size-12 flex items-center justify-center">
+               <button onClick={closeModal} className="text-white/40 hover:text-white transition-colors size-12 flex items-center justify-center">
                  <span className="material-symbols-outlined text-4xl">close</span>
                </button>
             </div>
@@ -164,13 +195,22 @@ const ProtocolStore: React.FC = () => {
                   <img src={selectedProduct.image} alt={selectedProduct.title} className="w-full h-full object-cover" />
                 </div>
                 <div className="space-y-4">
-                  <button className="w-full bg-primary text-black py-5 font-black text-xs uppercase tracking-widest hover:bg-white transition-all transform active:scale-95 shadow-xl">
+                  <button 
+                    onClick={() => sounds.playClick()}
+                    className="w-full bg-primary text-black py-5 font-black text-xs uppercase tracking-widest hover:bg-white transition-all transform active:scale-95 shadow-xl"
+                  >
                     Authorize Protocol Acquisition
                   </button>
-                  <div className="p-4 bg-white/5 border border-white/5">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest mb-1 text-center">Encryption Status</p>
-                    <p className="text-xs font-mono text-primary text-center">SHA-512 SECURED</p>
-                  </div>
+                  <button 
+                    onClick={handleSpeak}
+                    disabled={!intelReport || isSpeaking}
+                    className="w-full bg-white/5 border border-white/10 text-white py-4 font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-3 disabled:opacity-30 group"
+                  >
+                    <span className={`material-symbols-outlined text-lg ${isSpeaking ? 'animate-pulse text-primary' : ''}`}>
+                      {isSpeaking ? 'audio_file' : 'volume_up'}
+                    </span>
+                    {isSpeaking ? 'SYNTESIZING...' : 'SYNTHESIZE VOICE INTEL'}
+                  </button>
                 </div>
               </div>
               
@@ -194,15 +234,9 @@ const ProtocolStore: React.FC = () => {
                         <div className="flex flex-col gap-6">
                           <div className="h-4 bg-white/5 w-3/4 animate-pulse"></div>
                           <div className="h-4 bg-white/5 w-full animate-pulse [animation-delay:0.1s]"></div>
-                          <div className="h-4 bg-white/5 w-5/6 animate-pulse [animation-delay:0.2s]"></div>
-                          <div className="h-4 bg-white/5 w-2/3 animate-pulse [animation-delay:0.3s]"></div>
-                          <div className="mt-12 flex items-center gap-4">
-                             <div className="size-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                             <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Decrypting Protocol Encryptions...</p>
-                          </div>
                         </div>
                       ) : (
-                        <div className="whitespace-pre-wrap animate-fade-in border-l-2 border-primary/20 pl-8">
+                        <div className={`whitespace-pre-wrap animate-fade-in border-l-2 pl-8 transition-colors duration-1000 ${isSpeaking ? 'border-primary shadow-[inset_10px_0_20px_-10px_rgba(0,255,127,0.1)]' : 'border-primary/20'}`}>
                           {intelReport}
                         </div>
                       )}

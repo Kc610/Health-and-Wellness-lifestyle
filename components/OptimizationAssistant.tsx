@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createOptimizationChat } from '../services/gemini';
 import { ChatMessage } from '../types';
+import { sounds } from '../services/ui-sounds';
 
 interface Props {
   onClose: () => void;
@@ -30,6 +31,7 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
+    sounds.playInject();
     const userMessage = input;
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userMessage, timestamp: new Date() }]);
@@ -53,6 +55,7 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
           return newMessages;
         });
       }
+      sounds.playBlip();
     } catch (error) {
       console.error("Agent error:", error);
       setMessages(prev => [...prev, { role: 'model', text: "Communication link unstable. Resetting neural node...", timestamp: new Date() }]);
@@ -65,7 +68,7 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
     <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex justify-end">
       <div 
         className="absolute inset-0" 
-        onClick={onClose}
+        onClick={() => { sounds.playClick(); onClose(); }}
       ></div>
       
       <div className="relative w-full max-w-xl bg-surface-dark border-l border-white/10 h-full flex flex-col shadow-2xl animate-slide-left">
@@ -80,7 +83,7 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
             </div>
           </div>
           <button 
-            onClick={onClose}
+            onClick={() => { sounds.playClick(); onClose(); }}
             className="size-10 flex items-center justify-center hover:bg-white/5 transition-colors"
           >
             <span className="material-symbols-outlined">close</span>
@@ -106,8 +109,8 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
               <div className="bg-primary/5 border border-primary/20 p-4">
                 <div className="flex gap-1">
                   <div className="size-1.5 bg-primary animate-bounce"></div>
-                  <div className="size-1.5 bg-primary animate-bounce [animation-delay:0.2s]"></div>
-                  <div className="size-1.5 bg-primary animate-bounce [animation-delay:0.4s]"></div>
+                  <div className="size-1.5 bg-primary animate-bounce [animation-delay:0.2s] text-[0]">.</div>
+                  <div className="size-1.5 bg-primary animate-bounce [animation-delay:0.4s] text-[0]">.</div>
                 </div>
               </div>
             </div>

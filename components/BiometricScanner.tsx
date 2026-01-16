@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { analyzeBiometrics } from '../services/gemini';
+import { sounds } from '../services/ui-sounds';
 
 const BiometricScanner: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -24,6 +25,7 @@ const BiometricScanner: React.FC = () => {
   };
 
   const handleScan = async () => {
+    sounds.playInject();
     setIsCapturing(true);
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
@@ -36,6 +38,7 @@ const BiometricScanner: React.FC = () => {
         const result = await analyzeBiometrics(base64);
         setAnalysis(result);
         setIsScanning(false);
+        sounds.playBlip();
       }
     }
     setIsCapturing(false);
@@ -65,7 +68,7 @@ const BiometricScanner: React.FC = () => {
 
           {!hasPermission && (
             <button 
-              onClick={() => setHasPermission(true)}
+              onClick={() => { sounds.playClick(); setHasPermission(true); }}
               className="bg-primary text-black px-10 py-5 font-black text-xs tracking-widest uppercase hover:bg-white transition-all flex items-center gap-3"
             >
               <span className="material-symbols-outlined">videocam</span>

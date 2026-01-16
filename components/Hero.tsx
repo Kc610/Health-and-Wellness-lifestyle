@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { sounds } from '../services/ui-sounds';
 
 const Hero: React.FC = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -34,11 +35,17 @@ const Hero: React.FC = () => {
         </h2>
         
         <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-          <button className="group relative bg-primary text-black px-12 py-6 font-black text-sm tracking-[0.2em] uppercase overflow-hidden">
+          <button 
+            onClick={() => sounds.playInject()}
+            className="group relative bg-primary text-black px-12 py-6 font-black text-sm tracking-[0.2em] uppercase overflow-hidden"
+          >
             <span className="relative z-10">Initialize Optimization</span>
             <div className="absolute inset-0 bg-white transform translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
           </button>
-          <button className="bg-white/5 border border-white/20 backdrop-blur-md text-white px-12 py-6 font-black text-sm tracking-[0.2em] uppercase hover:bg-white/10 transition-all">
+          <button 
+            onClick={() => sounds.playClick()}
+            className="bg-white/5 border border-white/20 backdrop-blur-md text-white px-12 py-6 font-black text-sm tracking-[0.2em] uppercase hover:bg-white/10 transition-all"
+          >
             Access Intel
           </button>
         </div>

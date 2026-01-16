@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import IntelTicker from './components/IntelTicker';
@@ -10,18 +10,69 @@ import ProtocolStore from './components/ProtocolStore';
 import OptimizationAssistant from './components/OptimizationAssistant';
 import LiveCoach from './components/LiveCoach';
 import Footer from './components/Footer';
+import { sounds } from './services/ui-sounds';
 
 const App: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const handleStart = () => {
+    sounds.playInject();
+    setIsInitialized(true);
+    setIsCoachOpen(true);
+  };
+
+  const toggleAssistant = () => {
+    sounds.playBlip();
+    setIsAssistantOpen(!isAssistantOpen);
+  };
+
+  const toggleCoach = () => {
+    sounds.playBlip();
+    setIsCoachOpen(!isCoachOpen);
+  };
 
   return (
     <div className="relative min-h-screen">
+      {!isInitialized && (
+        <div className="fixed inset-0 z-[500] bg-black flex flex-col items-center justify-center p-8">
+          <div className="max-w-md w-full text-center space-y-12">
+            <div className="flex justify-center mb-8">
+              <div className="size-24 border-2 border-primary animate-spin rounded-full flex items-center justify-center">
+                <div className="size-16 border-2 border-primary/30 animate-reverse-spin rounded-full"></div>
+              </div>
+            </div>
+            <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white">
+              Initialize <span className="text-primary italic">Hello Healthy</span>
+            </h2>
+            <p className="font-mono text-[10px] text-slate-500 uppercase tracking-[0.4em]">
+              Bypassing neural encryption... system check optimal.
+            </p>
+            <button 
+              onClick={handleStart}
+              className="w-full bg-primary text-black py-6 font-black text-sm tracking-[0.3em] uppercase hover:bg-white transition-all transform active:scale-95"
+            >
+              Enter Node
+            </button>
+          </div>
+          <style>{`
+            @keyframes reverse-spin {
+              from { transform: rotate(360deg); }
+              to { transform: rotate(0deg); }
+            }
+            .animate-reverse-spin {
+              animation: reverse-spin 3s linear infinite;
+            }
+          `}</style>
+        </div>
+      )}
+
       <div className="grainy-overlay fixed inset-0 z-[60]"></div>
       
       <Header 
-        onOpenAssistant={() => setIsAssistantOpen(true)} 
-        onOpenCoach={() => setIsCoachOpen(true)}
+        onOpenAssistant={toggleAssistant} 
+        onOpenCoach={toggleCoach}
       />
       <IntelTicker />
       
@@ -41,10 +92,16 @@ const App: React.FC = () => {
                 <h4 className="font-display text-4xl font-black mb-6 uppercase tracking-tighter">Begin Your Protocol</h4>
                 <p className="text-slate-400 mb-8 font-light text-lg">The world's most advanced biological optimization toolkit. Engineered for those who refuse to settle.</p>
                 <div className="flex flex-wrap gap-4">
-                  <button className="bg-white text-black px-8 py-4 font-black text-xs tracking-widest uppercase hover:bg-primary transition-colors">
+                  <button 
+                    onClick={() => sounds.playClick()}
+                    className="bg-white text-black px-8 py-4 font-black text-xs tracking-widest uppercase hover:bg-primary transition-colors"
+                  >
                     Secure Membership
                   </button>
-                  <button className="border border-white/20 px-8 py-4 font-black text-xs tracking-widest uppercase hover:bg-white/5 transition-colors">
+                  <button 
+                    onClick={() => sounds.playClick()}
+                    className="border border-white/20 px-8 py-4 font-black text-xs tracking-widest uppercase hover:bg-white/5 transition-colors"
+                  >
                     Access Intel Node
                   </button>
                 </div>
@@ -72,7 +129,7 @@ const App: React.FC = () => {
 
       {/* Floating Action Button for AI Assistant */}
       <button 
-        onClick={() => setIsAssistantOpen(true)}
+        onClick={toggleAssistant}
         className="fixed bottom-8 right-8 z-[70] group"
       >
         <div className="absolute inset-0 bg-primary blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>

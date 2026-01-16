@@ -26,9 +26,9 @@ const Footer: React.FC = () => {
         </div>
       </div>
       
-      <div className="mt-20 text-center border-t border-white/5 pt-10">
-        <p className="text-[9px] text-slate-700 font-bold uppercase tracking-[0.5em]">
-          © 2024 HELLO HEALTHY NODE. ALL SYSTEMS ACTIVE.
+      <div className="mt-20 text-center border-t border-white/5 pt-10 pb-4">
+        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.6em] hover:text-primary transition-colors cursor-default select-none">
+          © 2024 HELLO HEALTHY NODE <span className="mx-4 text-white/10">|</span> ALL SYSTEMS ACTIVE <span className="mx-4 text-white/10">|</span> VERSION 3.1.4
         </p>
       </div>
     </footer>

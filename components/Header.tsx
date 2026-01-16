@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Logo from './Logo';
+import { sounds } from '../services/ui-sounds';
 
 interface HeaderProps {
   onOpenAssistant: () => void;
@@ -22,7 +23,8 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach }) => {
           {['The Stacks', 'Optimization', 'Protocol Intel', 'Nodes'].map((item) => (
             <a 
               key={item}
-              className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group" 
+              onClick={() => sounds.playClick()}
+              className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer" 
               href="#"
             >
               {item}
@@ -33,20 +35,23 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach }) => {
         
         <div className="flex items-center gap-6">
           <button 
-            onClick={onOpenCoach}
+            onClick={() => { sounds.playBlip(); onOpenCoach(); }}
             className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 text-primary hover:bg-primary hover:text-black transition-all"
           >
             <span className="material-symbols-outlined text-lg">settings_voice</span>
             NEURAL LINK
           </button>
           <button 
-            onClick={onOpenAssistant}
+            onClick={() => { sounds.playBlip(); onOpenAssistant(); }}
             className="hidden md:flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-lg">terminal</span>
             SYNC AGENT
           </button>
-          <button className="text-[10px] font-bold tracking-[0.3em] border border-white/20 px-8 py-3 hover:bg-white hover:text-black transition-all">
+          <button 
+            onClick={() => sounds.playClick()}
+            className="text-[10px] font-bold tracking-[0.3em] border border-white/20 px-8 py-3 hover:bg-white hover:text-black transition-all"
+          >
             LOGIN
           </button>
         </div>
