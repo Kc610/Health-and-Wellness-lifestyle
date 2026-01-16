@@ -7,75 +7,75 @@ import { sounds } from '../services/ui-sounds';
 const PRODUCTS: Product[] = [
   {
     handle: "5-htp",
-    title: "5-HTP Protocol",
+    title: "5-HTP Pulse",
     price: "19.90",
-    sku: "VOX45HTP",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044019636-generated-label-image-0.jpg",
-    category: "Amino Acids & Blends",
-    description: "5-HTP occurs naturally in the body. Aids in supporting normal serotonin levels in the brain and emotional well-being."
+    sku: "VITA-5HTP",
+    image: "https://images.unsplash.com/photo-1616671285442-8941783f064b?auto=format&fit=crop&q=80&w=800",
+    category: "Neural Modulators",
+    description: "Serotonin precursor designed to stabilize neural frequency and emotional vitality."
   },
   {
     handle: "ashwagandha",
-    title: "Ashwagandha Adaptogen",
+    title: "Ashwagandha Synergy",
     price: "23.90",
-    sku: "VOX4ASHW",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044025355-generated-label-image-0.jpg",
-    category: "Natural Extracts",
-    description: "Powerful adaptogen that helps individuals calm their stress levels. Contains potent chemicals that help to support overall health."
+    sku: "VITA-ASHW",
+    image: "https://images.unsplash.com/photo-1627575086477-b76573b9d79b?auto=format&fit=crop&q=80&w=800",
+    category: "Adaptogen Helix",
+    description: "Potent adaptogenic extract that optimizes the metabolic response to environmental stressors."
   },
   {
     handle: "alpha-energy",
-    title: "Alpha Energy Spike",
+    title: "Alpha Vitality Spike",
     price: "40.90",
-    sku: "VOX4TEST",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044108339-generated-label-image-0.jpg",
-    category: "Specialty Supplements",
-    description: "Supports Men's Vitality and Wellness. Formulated with magnesium, zinc, tribulus terrestris, and more."
+    sku: "VITA-ALPHA",
+    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800",
+    category: "Metabolic Specialty",
+    description: "Complex of magnesium, zinc, and tribulus for peak physical performance and cellular energy."
   },
   {
     handle: "chaga-mushroom",
-    title: "Chaga Intel Node",
+    title: "Chaga Vitality Shield",
     price: "29.90",
-    sku: "RLC3CHAG",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044056015-generated-label-image-0.jpg",
-    category: "Natural Extracts",
-    description: "Loaded with essential phytochemicals that stimulate the immunological and hormonal systems."
+    sku: "VITA-CHAG",
+    image: "https://images.unsplash.com/photo-1541013222724-49f3da3d899b?auto=format&fit=crop&q=80&w=800",
+    category: "Immune Catalysts",
+    description: "Encrypted phytochemical blend for immunological resilience and hormonal stabilization."
   },
   {
     handle: "creatine-monohydrate",
-    title: "Creatine Monohydrate",
+    title: "Creatine Helix",
     price: "33.90",
-    sku: "RLC4CREA",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044066488-generated-label-image-0.jpg",
-    category: "Amino Acids & Blends",
-    description: "Crucial role in energy production within your muscles. bridging the gap for muscle protein synthesis."
+    sku: "VITA-CREA",
+    image: "https://images.unsplash.com/photo-1593095117714-1244cf4545d1?auto=format&fit=crop&q=80&w=800",
+    category: "Cellular Energy",
+    description: "Muscle ATP regeneration patch for high-output metabolic sessions."
   },
   {
     handle: "hydration-powder-lemonade",
-    title: "Hydration (Lemonade)",
+    title: "Hydration Sync",
     price: "34.99",
-    sku: "OSM0LEMO",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044367310-generated-label-image-0.jpg",
-    category: "Specialty Supplements",
-    description: "Refreshing drink that blends essential electrolytes to keep you revitalized and energized."
+    sku: "VITA-HYDR",
+    image: "https://images.unsplash.com/photo-1533035353720-f1c6a75cd8ab?auto=format&fit=crop&q=80&w=800",
+    category: "Electrolyte Balance",
+    description: "Balanced ionic matrix for maintaining intracellular osmotic pressure."
   },
   {
     handle: "keto-5",
-    title: "Keto-5 Fuel",
+    title: "Keto-5 Catalyst",
     price: "32.90",
-    sku: "VOX4KETO",
-    image: "https://cdn.shopify.com/s/files/1/0595/1012/6126/files/1758059510126-generated-label-image-0.jpg",
-    category: "Specialty Supplements",
-    description: "Helps the body burn fat effectively by entering the body into the ketosis metabolic state."
+    sku: "VITA-KETO",
+    image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80&w=800",
+    category: "Ketosis Protocol",
+    description: "Exogenous ketone salts to stabilize the metabolic shift to fat-burning optimization."
   },
   {
     handle: "ultra-cleanse-greens",
-    title: "Smoothie Greens",
+    title: "Smoothie Synergy",
     price: "42.90",
-    sku: "RLC5GRNS",
-    image: "https://cdn.shopify.com/s/files/1/0678/4928/9863/files/1758044074464-generated-label-image-0.jpg",
-    category: "Natural Extracts",
-    description: "Blend of organic grasses, superfoods, and botanical extracts for optimal mental and physical functionality."
+    sku: "VITA-GRNS",
+    image: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&q=80&w=800",
+    category: "Phyto-Strands",
+    description: "Organic superfood blend for comprehensive physical and cognitive functionality."
   }
 ];
 
@@ -150,8 +150,8 @@ const ProtocolStore: React.FC = () => {
       <div className="max-w-[1440px] mx-auto px-8">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
           <div>
-            <p className="text-primary font-bold tracking-[0.3em] uppercase mb-4 text-xs">Proprietary Stacks</p>
-            <h2 className="font-display text-5xl md:text-6xl font-black uppercase tracking-tighter">Inventory <span className="text-primary italic">Access</span></h2>
+            <p className="text-primary font-bold tracking-[0.3em] uppercase mb-4 text-xs">Proprietary Strands</p>
+            <h2 className="font-display text-5xl md:text-6xl font-black uppercase tracking-tighter">Inventory <span className="text-primary italic">Helix</span></h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
              <div className="relative group">
@@ -159,7 +159,7 @@ const ProtocolStore: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="QUERY INVENTORY..."
+                  placeholder="QUERY HELIX..."
                   className="bg-surface-dark border border-white/10 px-6 py-4 pl-12 text-[10px] font-mono tracking-widest uppercase focus:border-primary outline-none transition-all w-full sm:min-w-[300px] text-white"
                 />
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg group-focus-within:text-primary transition-colors">search</span>
@@ -174,7 +174,7 @@ const ProtocolStore: React.FC = () => {
              </div>
              <div className="flex items-center gap-2 px-6 py-4 border border-white/10 bg-white/5 h-[54px]">
                 <span className="size-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Node Sync Active</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vitality Sync Active</span>
              </div>
           </div>
         </div>
@@ -182,7 +182,7 @@ const ProtocolStore: React.FC = () => {
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 animate-fade-in">
             {filteredProducts.map((product) => (
-              <div key={product.handle} className="group relative bg-surface-dark border border-white/5 hover:border-primary/40 transition-all duration-500 hover:-translate-y-2">
+              <div key={product.handle} className="group relative bg-surface-dark border border-white/5 hover:border-primary/40 transition-all duration-500 hover:-translate-y-2 shadow-2xl">
                 <div className="aspect-[4/5] overflow-hidden bg-black/40 relative">
                   <img 
                     src={product.image} 
@@ -200,7 +200,7 @@ const ProtocolStore: React.FC = () => {
                   <h3 className="font-display text-2xl font-bold uppercase tracking-tight mb-6 group-hover:text-primary transition-colors">{product.title}</h3>
                   
                   <div className="flex items-center justify-between">
-                    <p className="font-mono text-xl font-bold">${product.price}</p>
+                    <p className="font-mono text-xl font-bold text-white">${product.price}</p>
                     <button 
                       onClick={() => handleDecompile(product)}
                       className="text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 px-4 py-2 hover:bg-primary hover:text-black hover:border-primary transition-all"
@@ -214,8 +214,8 @@ const ProtocolStore: React.FC = () => {
           </div>
         ) : (
           <div className="py-32 text-center border border-dashed border-white/10 bg-white/5 animate-pulse">
-            <span className="material-symbols-outlined text-6xl text-slate-700 mb-6">inventory_2</span>
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-slate-500">No matching protocols found in current node sector.</p>
+            <span className="material-symbols-outlined text-6xl text-slate-700 mb-6">healing</span>
+            <p className="font-mono text-xs uppercase tracking-[0.4em] text-slate-500">No matching vitality strands found in current pulse sector.</p>
           </div>
         )}
       </div>
@@ -241,7 +241,7 @@ const ProtocolStore: React.FC = () => {
                     onClick={() => sounds.playClick()}
                     className="w-full bg-primary text-black py-5 font-black text-xs uppercase tracking-widest hover:bg-white transition-all transform active:scale-95 shadow-xl"
                   >
-                    Authorize Protocol Acquisition
+                    Authorize Helix Sync
                   </button>
                   <button 
                     onClick={handleSpeak}
@@ -249,7 +249,7 @@ const ProtocolStore: React.FC = () => {
                     className={`w-full border py-4 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-30 group ${error ? 'bg-safety-orange/10 border-safety-orange/30 text-safety-orange hover:bg-safety-orange hover:text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
                   >
                     <span className={`material-symbols-outlined text-lg ${isSpeaking ? 'animate-pulse text-primary' : ''}`}>
-                      {isSpeaking ? 'audio_file' : error ? 'error' : 'volume_up'}
+                      {isSpeaking ? 'audio_file' : error ? 'error' : 'hearing'}
                     </span>
                     {isSpeaking ? 'SYNTESIZING...' : error ? 'RETRY SYNTH' : 'SYNTHESIZE VOICE INTEL'}
                   </button>
@@ -260,16 +260,16 @@ const ProtocolStore: React.FC = () => {
                 <div className="mb-10">
                   <h3 className="font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-primary mb-2">{selectedProduct.title}</h3>
                   <div className="flex items-center gap-4 text-slate-500">
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Protocol Node: {selectedProduct.sku}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Helix ID: {selectedProduct.sku}</span>
                     <span className="size-1 bg-slate-700 rounded-full"></span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Global Auth Required</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Biological Auth Required</span>
                   </div>
                 </div>
 
                 <div className="space-y-12">
                   <div>
                     <h4 className={`font-mono text-[10px] uppercase tracking-[0.4em] mb-6 flex items-center gap-3 transition-colors ${error ? 'text-safety-orange' : 'text-primary/60'}`}>
-                      <span className={`h-px w-8 ${error ? 'bg-safety-orange/40' : 'bg-primary/20'}`}></span> {error ? 'Neural Link Error' : 'Biological Intel Report'}
+                      <span className={`h-px w-8 ${error ? 'bg-safety-orange/40' : 'bg-primary/20'}`}></span> {error ? 'Pulse Link Error' : 'Biological Intel Report'}
                     </h4>
                     <div className="font-mono text-sm leading-relaxed text-slate-300 min-h-[300px]">
                       {isGenerating ? (

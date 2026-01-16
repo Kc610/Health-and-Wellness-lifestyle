@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { loadingTracker } from "./loading";
 
@@ -60,7 +61,7 @@ export const speakProtocol = async (text: string) => {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Read this protocol intel briefing with focused, elite authority: ${text}` }] }],
+      contents: [{ parts: [{ text: `Read this vitality protocol intel with focused, elite authority: ${text}` }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -95,7 +96,7 @@ export const generateOptimizationLogs = async () => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: "Generate exactly 4 high-performance bio-optimization data logs for a futuristic training collective dashboard. Each log entry must follow the provided schema strictly. Return only valid JSON." }] }],
+      contents: [{ parts: [{ text: "Generate exactly 4 high-performance vitality optimization logs for a futuristic training collective dashboard. Each log entry must follow the provided schema strictly. Return only valid JSON. Use 'PULSE' instead of 'NODE'." }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -104,12 +105,12 @@ export const generateOptimizationLogs = async () => {
             type: Type.OBJECT,
             properties: {
               id: { type: Type.STRING, description: "Unique UUID for the log entry" },
-              nodeType: { type: Type.STRING, description: "Categorization of the node, e.g., 'ELITE', 'NEURAL', 'CORE'" },
+              nodeType: { type: Type.STRING, description: "Categorization of the pulse unit, e.g., 'ELITE', 'CELLULAR', 'PULSE-CORE'" },
               category: { type: Type.STRING, description: "Broad biological focus area" },
               metric: { type: Type.STRING, description: "The specific biological metric being optimized" },
               value: { type: Type.STRING, description: "The numerical or qualitative result of the metric" },
-              user: { type: Type.STRING, description: "Pseudo-anonymous handler name" },
-              location: { type: Type.STRING, description: "Major city node location" }
+              user: { type: Type.STRING, description: "Pseudo-anonymous subject name" },
+              location: { type: Type.STRING, description: "Major city vitality sector" }
             },
             required: ["id", "nodeType", "category", "metric", "value", "user", "location"],
             propertyOrdering: ["id", "nodeType", "category", "metric", "value", "user", "location"]
@@ -123,7 +124,7 @@ export const generateOptimizationLogs = async () => {
     return parsed;
   } catch (err) {
     console.error("Failed to fetch logs:", err);
-    throw new NeuralLinkError("Collective Intelligence Node timed out. Biological logs inaccessible.", "GRID_SYNC_FAIL");
+    throw new NeuralLinkError("Collective Intelligence Pulse timed out. Biological logs inaccessible.", "GRID_SYNC_FAIL");
   } finally {
     loadingTracker.end();
   }
@@ -135,10 +136,10 @@ export const generateProductIntel = async (productTitle: string, baseDescription
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `Translate this biological supplement description into a high-tech "Protocol Intel Report" for the Human Evolution Collective. 
+      contents: [{ parts: [{ text: `Translate this biological supplement description into a high-tech "Vitality Intel Report" for the Human Evolution Collective. 
       Product: ${productTitle}
       Original Info: ${baseDescription}
-      Use cold, analytical, futuristic terminology. Format as a briefing with "Primary Function", "Neural Impact", and "Biological Patch Version".` }] }],
+      Use cold, analytical, futuristic terminology. Format as a briefing with "Primary Function", "Vitality Impact", and "Biological Patch Version". Use 'Pulse' and 'Helix' terminology.` }] }],
     });
     return response.text || "INTEL DECRYPTION FAILED. ACCESS DENIED.";
   } catch (err) {
@@ -154,7 +155,7 @@ export const generateIntelLeaks = async () => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: "Generate 10 short, cryptic, and high-tech 'intel leaks' for an encrypted ticker. Return as a JSON array of strings." }] }],
+      contents: [{ parts: [{ text: "Generate 10 short, cryptic, and high-tech 'vitality leaks' for an encrypted ticker. Use words like 'Pulse', 'Helix', 'Synergy', 'Frequency'. Return as a JSON array of strings." }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -168,7 +169,7 @@ export const generateIntelLeaks = async () => {
     return parsed;
   } catch (err) {
     console.warn("Leak feed sync failed, using emergency buffer.");
-    return ["LINK STABLE", "NODES ACTIVE", "ENCRYPTED CHANNEL", "BUFFERING..."];
+    return ["PULSE STABLE", "VITALITY ACTIVE", "ENCRYPTED FREQUENCY", "BUFFERING..."];
   } finally {
     loadingTracker.end();
   }
@@ -182,7 +183,7 @@ export const analyzeBiometrics = async (base64Image: string) => {
       model: 'gemini-3-flash-preview',
       contents: [
         { inlineData: { mimeType: "image/jpeg", data: base64Image } },
-        { text: "Analyze this human biological specimen for optimization potential. Provide specific data metrics following the requested schema. Return JSON." }
+        { text: "Analyze this human biological specimen for vitality potential. Provide specific data metrics following the requested schema. Return JSON. Mention 'Pulse Synergy' in the recommendation." }
       ],
       config: {
         responseMimeType: "application/json",
@@ -213,13 +214,12 @@ export const analyzeVideoKinetic = async (frames: string[]) => {
   loadingTracker.start();
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
-    // FIX: Using spread to initialize parts ensures TypeScript allows both inlineData and text objects in the array.
     const parts: any[] = [
       ...frames.map(data => ({
         inlineData: { mimeType: "image/jpeg", data }
       })),
       { 
-        text: "Analyze this sequence of video frames from a human performance node. Extract key kinetic information, biological optimization markers, and mechanical efficiency insights. Provide a high-tech briefing titled 'KINETIC PERFORMANCE AUDIT'." 
+        text: "Analyze this sequence of video frames from a human performance pulse unit. Extract key kinetic information, biological optimization markers, and mechanical efficiency insights. Provide a high-tech briefing titled 'VITALITY PERFORMANCE AUDIT'." 
       }
     ];
 
@@ -230,7 +230,7 @@ export const analyzeVideoKinetic = async (frames: string[]) => {
     return response.text || "DECODING FAILED: NO TELEMETRY EXTRACTED.";
   } catch (err) {
     console.error("Video analysis failed:", err);
-    throw new NeuralLinkError("Visual Intelligence Core overload. Video intel extraction failed.", "VIDEO_INTEL_FAIL");
+    throw new NeuralLinkError("Visual Intelligence Core overload. Video vitality extraction failed.", "VIDEO_INTEL_FAIL");
   } finally {
     loadingTracker.end();
   }
@@ -241,7 +241,7 @@ export const createOptimizationChat = () => {
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: "You are the Hello Healthy Chief Optimization Agent. Professional, analytical, high-performance persona. Goal: biological optimization advice.",
+      systemInstruction: "You are the Hello Healthy Chief Synergy Agent. Professional, analytical, high-performance persona. Goal: biological vitality and pulse optimization advice. Use 'Pulse', 'Helix', 'Synergy' terminology.",
     }
   });
 };

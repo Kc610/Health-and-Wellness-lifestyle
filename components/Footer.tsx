@@ -9,26 +9,26 @@ const Footer: React.FC = () => {
         <div>
           <div className="flex items-center gap-4 mb-6">
             <Logo className="size-8" />
-            <h2 className="font-display text-lg font-extrabold tracking-[0.2em] uppercase">Hello <span className="text-primary">Healthy</span></h2>
+            <h2 className="font-display text-lg font-extrabold tracking-[0.2em] uppercase">Hello <span className="text-primary italic">Healthy</span></h2>
           </div>
-          <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.3em]">Built for the elite. Biological optimization without compromise.</p>
+          <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.3em]">Built for the elite. Biological vitality without compromise.</p>
         </div>
         
         <div className="flex flex-wrap justify-center gap-12 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-          {['Protocols', 'Hardware', 'Intel Nodes', 'Privacy'].map(item => (
+          {['Protocols', 'Helix Access', 'Vitality Strands', 'Bio-Privacy'].map(item => (
             <a key={item} className="hover:text-primary transition-colors" href="#">{item}</a>
           ))}
         </div>
         
         <div className="flex gap-4">
-          <SocialLink icon="alternate_email" />
-          <SocialLink icon="terminal" />
+          <SocialLink icon="monitor_heart" />
+          <SocialLink icon="dna" />
         </div>
       </div>
       
       <div className="mt-20 text-center border-t border-white/5 pt-10 pb-4">
         <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.6em] hover:text-primary transition-colors cursor-default select-none">
-          © 2024 HELLO HEALTHY NODE <span className="mx-4 text-white/10">|</span> ALL SYSTEMS ACTIVE <span className="mx-4 text-white/10">|</span> VERSION 3.1.4
+          © 2024 HELLO HEALTHY PULSE <span className="mx-4 text-white/10">|</span> ALL SYSTEMS ACTIVE <span className="mx-4 text-white/10">|</span> VERSION 3.2.0
         </p>
       </div>
     </footer>

@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenPro
             Kinetic Intel
             <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary"></span>
           </a>
-          {['The Stacks', 'Optimization', 'Protocol Intel', 'Nodes'].map((item) => (
+          {['The Stacks', 'Optimization', 'Protocol Intel', 'Vitality Strands'].map((item) => (
             <a 
               key={item}
               onClick={() => sounds.playClick()}
@@ -44,15 +44,15 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenPro
             onClick={() => { sounds.playBlip(); onOpenProfile(); }}
             className="hidden sm:flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] border border-white/10 px-4 py-2 text-slate-400 hover:text-white hover:border-white/30 transition-all"
           >
-            <span className="material-symbols-outlined text-lg">fingerprint</span>
-            BIO-DATA
+            <span className="material-symbols-outlined text-lg">ecg</span>
+            VITAL-DATA
           </button>
           <button 
             onClick={() => { sounds.playBlip(); onOpenCoach(); }}
-            className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 text-primary hover:bg-primary hover:text-black transition-all"
+            className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 text-primary hover:bg-primary hover:text-black transition-all shadow-[0_0_15px_rgba(0,255,127,0.1)]"
           >
-            <span className="material-symbols-outlined text-lg">settings_voice</span>
-            NEURAL LINK
+            <span className="material-symbols-outlined text-lg">monitor_heart</span>
+            PULSE LINK
           </button>
           <button 
             onClick={() => sounds.playClick()}
