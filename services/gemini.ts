@@ -2,8 +2,6 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { loadingTracker } from "./loading";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
 /**
  * Custom Error for API interactions
  */
@@ -59,6 +57,7 @@ const decodeAudioData = async (data: Uint8Array, ctx: AudioContext, sampleRate: 
 
 export const speakProtocol = async (text: string) => {
   loadingTracker.start();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
@@ -93,10 +92,11 @@ export const speakProtocol = async (text: string) => {
 
 export const generateOptimizationLogs = async () => {
   loadingTracker.start();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: "Generate 4 high-performance bio-optimization data logs for a futuristic training collective. Each log needs a specific node level, a high-tech metric, a result, and a pseudo-anonymous username from a global city.",
+      contents: [{ parts: [{ text: "Generate exactly 4 high-performance bio-optimization data logs for a futuristic training collective dashboard. Each log entry must follow the provided schema strictly. Return only valid JSON." }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -104,22 +104,23 @@ export const generateOptimizationLogs = async () => {
           items: {
             type: Type.OBJECT,
             properties: {
-              id: { type: Type.STRING },
-              nodeType: { type: Type.STRING },
-              category: { type: Type.STRING },
-              metric: { type: Type.STRING },
-              value: { type: Type.STRING },
-              user: { type: Type.STRING },
-              location: { type: Type.STRING }
+              id: { type: Type.STRING, description: "Unique UUID for the log entry" },
+              nodeType: { type: Type.STRING, description: "Categorization of the node, e.g., 'ELITE', 'NEURAL', 'CORE'" },
+              category: { type: Type.STRING, description: "Broad biological focus area" },
+              metric: { type: Type.STRING, description: "The specific biological metric being optimized" },
+              value: { type: Type.STRING, description: "The numerical or qualitative result of the metric" },
+              user: { type: Type.STRING, description: "Pseudo-anonymous handler name" },
+              location: { type: Type.STRING, description: "Major city node location" }
             },
-            required: ["id", "nodeType", "category", "metric", "value", "user", "location"]
+            required: ["id", "nodeType", "category", "metric", "value", "user", "location"],
+            propertyOrdering: ["id", "nodeType", "category", "metric", "value", "user", "location"]
           }
         }
       }
     });
 
     const parsed = safeParseJson(response.text);
-    if (!parsed) throw new Error("Malformed grid data");
+    if (!parsed || !Array.isArray(parsed)) throw new Error("Malformed grid data");
     return parsed;
   } catch (err) {
     console.error("Failed to fetch logs:", err);
@@ -131,13 +132,14 @@ export const generateOptimizationLogs = async () => {
 
 export const generateProductIntel = async (productTitle: string, baseDescription: string) => {
   loadingTracker.start();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Translate this biological supplement description into a high-tech "Protocol Intel Report" for the Human Evolution Collective. 
+      contents: [{ parts: [{ text: `Translate this biological supplement description into a high-tech "Protocol Intel Report" for the Human Evolution Collective. 
       Product: ${productTitle}
       Original Info: ${baseDescription}
-      Use cold, analytical, futuristic terminology. Format as a briefing with "Primary Function", "Neural Impact", and "Biological Patch Version".`,
+      Use cold, analytical, futuristic terminology. Format as a briefing with "Primary Function", "Neural Impact", and "Biological Patch Version".` }] }],
     });
     return response.text || "INTEL DECRYPTION FAILED. ACCESS DENIED.";
   } catch (err) {
@@ -149,10 +151,11 @@ export const generateProductIntel = async (productTitle: string, baseDescription
 
 export const generateIntelLeaks = async () => {
   loadingTracker.start();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: "Generate 10 short, futuristic 'intel leaks'. Phrases should be short, cryptic, and high-tech.",
+      contents: [{ parts: [{ text: "Generate 10 short, cryptic, and high-tech 'intel leaks' for an encrypted ticker. Return as a JSON array of strings." }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -174,12 +177,13 @@ export const generateIntelLeaks = async () => {
 
 export const analyzeBiometrics = async (base64Image: string) => {
   loadingTracker.start();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [
         { inlineData: { mimeType: "image/jpeg", data: base64Image } },
-        { text: "Analyze this specimen for biological optimization potential. Return JSON." }
+        { text: "Analyze this human biological specimen for optimization potential. Provide specific data metrics following the requested schema. Return JSON." }
       ],
       config: {
         responseMimeType: "application/json",
@@ -190,7 +194,9 @@ export const analyzeBiometrics = async (base64Image: string) => {
             neuralLatency: { type: Type.STRING },
             metabolicEfficiency: { type: Type.STRING },
             protocolRecommendation: { type: Type.STRING }
-          }
+          },
+          required: ["geneticTier", "neuralLatency", "metabolicEfficiency", "protocolRecommendation"],
+          propertyOrdering: ["geneticTier", "neuralLatency", "metabolicEfficiency", "protocolRecommendation"]
         }
       }
     });
@@ -205,6 +211,7 @@ export const analyzeBiometrics = async (base64Image: string) => {
 };
 
 export const createOptimizationChat = () => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
