@@ -4,11 +4,20 @@ import { sounds } from '../services/ui-sounds';
 
 const Hero: React.FC = () => {
   const [scrollY, setScrollY] = useState(0);
+  const [pulseTime, setPulseTime] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    const interval = setInterval(() => {
+      setPulseTime(prev => (prev + 1) % 100);
+    }, 50);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(interval);
+    };
   }, []);
 
   return (
@@ -18,10 +27,17 @@ const Hero: React.FC = () => {
           alt="High-performance athlete" 
           className="w-full h-full object-cover scale-110 blur-[0.5px] opacity-30 transition-transform duration-700"
           style={{ transform: `scale(${1.05 + scrollY * 0.0001}) translateY(${scrollY * 0.2}px)` }}
-          src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&q=80&w=2069"
+          src="https://images.unsplash.com/photo-1548691905-57c36cc8d93f?auto=format&fit=crop&q=80&w=2069"
         />
         <div className="hero-gradient absolute inset-0"></div>
         
+        {/* Animated Grid Background */}
+        <div className="absolute inset-0 opacity-10" style={{ 
+          backgroundImage: 'linear-gradient(#00FF7F 1px, transparent 1px), linear-gradient(90deg, #00FF7F 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+          transform: `perspective(500px) rotateX(60deg) translateY(${scrollY * 0.5}px)`
+        }}></div>
+
         {/* Vitality Waveform Overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
           <svg viewBox="0 0 1000 400" className="w-full h-full">
@@ -33,6 +49,22 @@ const Hero: React.FC = () => {
               className="animate-pulse-draw"
             />
           </svg>
+        </div>
+      </div>
+
+      {/* Floating HUD Element */}
+      <div className="absolute top-32 left-8 hidden lg:block animate-float opacity-40">
+        <div className="p-6 border border-primary/20 bg-primary/5 backdrop-blur-md">
+          <div className="text-[8px] font-black text-primary uppercase tracking-[0.4em] mb-4">Metabolic Flux</div>
+          <div className="flex items-end gap-1 h-12">
+            {[...Array(20)].map((_, i) => (
+              <div 
+                key={i} 
+                className="w-1 bg-primary/40" 
+                style={{ height: `${20 + Math.sin((pulseTime + i) * 0.5) * 30 + 50}%` }}
+              ></div>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -78,6 +110,13 @@ const Hero: React.FC = () => {
         .animate-pulse-draw {
           stroke-dasharray: 1000;
           animation: pulse-draw 4s linear infinite;
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(1deg); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
         }
       `}</style>
     </section>
