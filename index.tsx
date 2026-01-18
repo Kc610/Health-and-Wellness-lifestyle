@@ -3,6 +3,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
+// Polyfill 'global' for libraries expecting a Node-like environment
+(window as any).global = window;
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
