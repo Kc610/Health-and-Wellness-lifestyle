@@ -83,7 +83,6 @@ export const speakProtocol = async (text: string) => {
     }
     throw new Error("No audio data returned");
   } catch (err) {
-    console.error("TTS Synthesis failed:", err);
     throw new NeuralLinkError("Neural voice link interrupted. Audio synthesis unavailable.", "VOICE_LINK_DOWN");
   } finally {
     loadingTracker.end();
@@ -123,7 +122,6 @@ export const generateOptimizationLogs = async () => {
     if (!parsed || !Array.isArray(parsed)) throw new Error("Malformed grid data");
     return parsed;
   } catch (err) {
-    console.error("Failed to fetch logs:", err);
     throw new NeuralLinkError("Collective Intelligence Pulse timed out. Biological logs inaccessible.", "GRID_SYNC_FAIL");
   } finally {
     loadingTracker.end();
@@ -168,8 +166,8 @@ export const generateIntelLeaks = async () => {
     if (!parsed) throw new Error("Invalid leak format");
     return parsed;
   } catch (err) {
-    console.warn("Leak feed sync failed, using emergency buffer.");
-    return ["PULSE STABLE", "VITALITY ACTIVE", "ENCRYPTED FREQUENCY", "BUFFERING..."];
+    // Silent fallback for ticker to prevent jarring console warnings in dev
+    return ["PULSE SYNC STABLE", "VITALITY helix active", "neural latency: optimal", "metabolic flux locked", "elite protocol: engaged", "bio-data secure", "helix sync: 98.4%", "performance peak: reached"];
   } finally {
     loadingTracker.end();
   }
@@ -229,7 +227,6 @@ export const analyzeVideoKinetic = async (frames: string[]) => {
     });
     return response.text || "DECODING FAILED: NO TELEMETRY EXTRACTED.";
   } catch (err) {
-    console.error("Video analysis failed:", err);
     throw new NeuralLinkError("Visual Intelligence Core overload. Video vitality extraction failed.", "VIDEO_INTEL_FAIL");
   } finally {
     loadingTracker.end();

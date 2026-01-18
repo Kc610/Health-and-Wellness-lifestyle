@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import IntelTicker from './components/IntelTicker';
 import BiometricScanner from './components/BiometricScanner';
+import BioFeedbackLoop from './components/BioFeedbackLoop';
 import Philosophy from './components/Philosophy';
 import IntelligenceGrid from './components/IntelligenceGrid';
 import ProtocolStore from './components/ProtocolStore';
@@ -109,6 +110,7 @@ const App: React.FC = () => {
       <main className="pt-28">
         <Hero />
         <BiometricScanner />
+        <BioFeedbackLoop />
         <Philosophy />
         <IntelligenceGrid />
         <ProtocolStore />
