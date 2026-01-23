@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { generateOptimizationLogs, NeuralLinkError } from '../services/gemini';
 import { OptimizationLog } from '../types';
@@ -142,15 +143,6 @@ const LogCard: React.FC<{ log: OptimizationLog; index: number }> = ({ log, index
         </div>
       </div>
       
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-          animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
     </div>
   );
 };

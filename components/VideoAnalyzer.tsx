@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 import { analyzeVideoKinetic, NeuralLinkError } from '../services/gemini';
 import { sounds } from '../services/ui-sounds';

@@ -31,6 +31,8 @@ export default {
         'fade-in': 'fadeIn 0.5s ease-out forwards',
         'slide-left': 'slideLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'marquee': 'marquee 40s linear infinite', /* Added marquee */
+        'dash-animate': 'dash-animate 1.2s infinite', /* Added for SVG dash offset */
       },
       keyframes: {
         float: {
@@ -72,6 +74,14 @@ export default {
           from: { opacity: '0', transform: 'translateY(30px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
+        marquee: { /* Keyframes for IntelTicker */
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        'dash-animate': { /* Keyframes for Logo SVG */
+          from: { 'stroke-dashoffset': '400' },
+          to: { 'stroke-dashoffset': '0' },
+        }
       }
     },
   },

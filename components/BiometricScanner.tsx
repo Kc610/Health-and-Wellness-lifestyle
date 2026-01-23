@@ -1,6 +1,7 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
-import { analyzeBiometrics } from '../services/gemini';
+import { analyzeBiometrics, NeuralLinkError } from '../services/gemini';
 import { sounds } from '../services/ui-sounds';
 
 const BiometricScanner: React.FC = () => {

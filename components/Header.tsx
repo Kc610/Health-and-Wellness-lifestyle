@@ -11,6 +11,14 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenProfile, onOpenVideo }) => {
+  const scrollToSection = (id: string) => {
+    sounds.playClick();
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="fixed top-0 z-[80] w-full border-b border-white/10 bg-black/80 backdrop-blur-xl">
       <div className="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
@@ -26,17 +34,23 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenPro
             Kinetic Intel
             <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary"></span>
           </a>
-          {['The Stacks', 'Optimization', 'Protocol Intel', 'Vitality Strands'].map((item) => (
-            <a 
-              key={item}
-              onClick={() => sounds.playClick()}
-              className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer" 
-              href="#"
-            >
-              {item}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
-            </a>
-          ))}
+          {/* Updated links to scroll to specific sections */}
+          <a onClick={() => scrollToSection('philosophy')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
+            The Stacks
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a onClick={() => scrollToSection('intelligence-grid')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
+            Optimization
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a onClick={() => scrollToSection('protocols')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
+            Protocol Intel
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a onClick={() => scrollToSection('footer')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
+            Vitality Strands
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
         </nav>
         
         <div className="flex items-center gap-6">

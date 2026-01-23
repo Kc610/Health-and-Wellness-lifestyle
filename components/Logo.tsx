@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 const Logo: React.FC<{ className?: string }> = ({ className = "size-10" }) => {
@@ -12,15 +13,12 @@ const Logo: React.FC<{ className?: string }> = ({ className = "size-10" }) => {
         {/* Dynamic Heartbeat Wave */}
         <path 
           d="M10 50 L30 50 L35 30 L40 70 L45 10 L50 90 L55 50 L90 50" 
-          className="stroke-primary group-hover:stroke-white transition-colors duration-500"
+          className="stroke-primary group-hover:stroke-white transition-colors duration-500 animate-dash-animate" /* Added animate-dash-animate */
           strokeWidth="5"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeDasharray="400"
-          strokeDashoffset="400"
-        >
-          <animate attributeName="stroke-dashoffset" from="400" to="0" dur="1.2s" repeatCount="indefinite" />
-        </path>
+        />
       </svg>
       {/* Visual Bloom */}
       <div className="absolute inset-0 bg-primary/30 blur-2xl opacity-0 group-hover:opacity-60 transition-opacity rounded-full"></div>
