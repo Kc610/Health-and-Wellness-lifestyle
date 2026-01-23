@@ -1,85 +1,12 @@
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Product } from '../types';
 import { generateProductIntel, speakProtocol, NeuralLinkError } from '../services/gemini';
 import { sounds } from '../services/ui-sounds';
-
-const PRODUCTS: Product[] = [
-  {
-    handle: "5-htp",
-    title: "5-HTP Pulse",
-    price: "19.90",
-    sku: "VITA-5HTP",
-    image: "https://images.unsplash.com/photo-1616671285442-8941783f064b?auto=format&fit=crop&q=80&w=800",
-    category: "Neural Modulators",
-    description: "Serotonin precursor designed to stabilize neural frequency and emotional vitality."
-  },
-  {
-    handle: "ashwagandha",
-    title: "Ashwagandha Synergy",
-    price: "23.90",
-    sku: "VITA-ASHW",
-    image: "https://images.unsplash.com/photo-1627575086477-b76573b9d79b?auto=format&fit=crop&q=80&w=800",
-    category: "Adaptogen Helix",
-    description: "Potent adaptogenic extract that optimizes the metabolic response to environmental stressors."
-  },
-  {
-    handle: "alpha-energy",
-    title: "Alpha Vitality Spike",
-    price: "40.90",
-    sku: "VITA-ALPHA",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800",
-    category: "Metabolic Specialty",
-    description: "Complex of magnesium, zinc, and tribulus for peak physical performance and cellular energy."
-  },
-  {
-    handle: "chaga-mushroom",
-    title: "Chaga Vitality Shield",
-    price: "29.90",
-    sku: "VITA-CHAG",
-    image: "https://images.unsplash.com/photo-1541013222724-49f3da3d899b?auto=format&fit=crop&q=80&w=800",
-    category: "Immune Catalysts",
-    description: "Encrypted phytochemical blend for immunological resilience and hormonal stabilization."
-  },
-  {
-    handle: "creatine-monohydrate",
-    title: "Creatine Helix",
-    price: "33.90",
-    sku: "VITA-CREA",
-    image: "https://images.unsplash.com/photo-1593095117714-1244cf4545d1?auto=format&fit=crop&q=80&w=800",
-    category: "Cellular Energy",
-    description: "Muscle ATP regeneration patch for high-output metabolic sessions."
-  },
-  {
-    handle: "hydration-powder-lemonade",
-    title: "Hydration Sync",
-    price: "34.99",
-    sku: "VITA-HYDR",
-    image: "https://images.unsplash.com/photo-1533035353720-f1c6a75cd8ab?auto=format&fit=crop&q=80&w=800",
-    category: "Electrolyte Balance",
-    description: "Balanced ionic matrix for maintaining intracellular osmotic pressure."
-  },
-  {
-    handle: "keto-5",
-    title: "Keto-5 Catalyst",
-    price: "32.90",
-    sku: "VITA-KETO",
-    image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80&w=800",
-    category: "Ketosis Protocol",
-    description: "Exogenous ketone salts to stabilize the metabolic shift to fat-burning optimization."
-  },
-  {
-    handle: "ultra-cleanse-greens",
-    title: "Smoothie Synergy",
-    price: "42.90",
-    sku: "VITA-GRNS",
-    image: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&q=80&w=800",
-    category: "Phyto-Strands",
-    description: "Organic superfood blend for comprehensive physical and cognitive functionality."
-  }
-];
+import { parseProductsFromCsv, rawCsvData } from '../utils/csvParser';
 
 const ProtocolStore: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [intelReport, setIntelReport] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -88,14 +15,22 @@ const ProtocolStore: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
+  useEffect(() => {
+    // Parse products from CSV data on component mount
+    const parsed = parseProductsFromCsv(rawCsvData);
+    setProducts(parsed);
+  }, []);
+
   const filteredProducts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return PRODUCTS;
-    return PRODUCTS.filter(product => 
-      product.title.toLowerCase().includes(query) || 
-      product.category.toLowerCase().includes(query)
+    if (!query) return products;
+    return products.filter(product =>
+      product.title.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query) ||
+      product.description.toLowerCase().includes(query) ||
+      product.tags.some(tag => tag.toLowerCase().includes(query))
     );
-  }, [searchQuery]);
+  }, [searchQuery, products]);
 
   const handleDecompile = async (product: Product) => {
     sounds.playInject();
@@ -104,7 +39,8 @@ const ProtocolStore: React.FC = () => {
     setIntelReport(null);
     setError(null);
     try {
-      const report = await generateProductIntel(product.title, product.description);
+      // Pass the full HTML description for a richer AI report
+      const report = await generateProductIntel(product.title, product.longDescriptionHtml || product.description);
       setIntelReport(report);
     } catch (e) {
       setError(e instanceof NeuralLinkError ? e.message : "LINK INTERRUPTED");
@@ -155,7 +91,7 @@ const ProtocolStore: React.FC = () => {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
              <div className="relative group">
-                <input 
+                <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -164,7 +100,7 @@ const ProtocolStore: React.FC = () => {
                 />
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg group-focus-within:text-primary transition-colors">search</span>
                 {searchQuery && (
-                  <button 
+                  <button
                     onClick={() => setSearchQuery('')}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
                   >
@@ -184,10 +120,10 @@ const ProtocolStore: React.FC = () => {
             {filteredProducts.map((product) => (
               <div key={product.handle} className="group relative bg-surface-dark border border-white/5 hover:border-primary/40 transition-all duration-500 hover:-translate-y-2 shadow-2xl">
                 <div className="aspect-[4/5] overflow-hidden bg-black/40 relative">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" 
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
                   />
                   <div className="absolute top-4 left-4">
                     <p className="text-[9px] font-black uppercase tracking-wider bg-black/80 px-2 py-1 border border-white/10 text-slate-400">
@@ -198,10 +134,10 @@ const ProtocolStore: React.FC = () => {
                 <div className="p-8">
                   <p className="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">{product.category}</p>
                   <h3 className="font-display text-2xl font-bold uppercase tracking-tight mb-6 group-hover:text-primary transition-colors">{product.title}</h3>
-                  
+
                   <div className="flex items-center justify-between">
-                    <p className="font-mono text-xl font-bold text-white">${product.price}</p>
-                    <button 
+                    <p className="font-mono text-xl font-bold text-white">${product.price.toFixed(2)}</p>
+                    <button
                       onClick={() => handleDecompile(product)}
                       className="text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 px-4 py-2 hover:bg-primary hover:text-black hover:border-primary transition-all"
                     >
@@ -236,14 +172,33 @@ const ProtocolStore: React.FC = () => {
                 <div className="aspect-square bg-black border border-white/10 mb-8 overflow-hidden">
                   <img src={selectedProduct.image} alt={selectedProduct.title} className="w-full h-full object-cover" />
                 </div>
+                {/* Add Rating and Reviews */}
+                {selectedProduct.rating > 0 && (
+                  <div className="flex items-center gap-2 mb-4">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className={`material-symbols-outlined text-lg ${i < Math.floor(selectedProduct.rating) ? 'text-yellow-400' : 'text-slate-700'}`}>star</span>
+                      ))}
+                      <span className="font-mono text-sm text-slate-400">{selectedProduct.rating.toFixed(1)} ({selectedProduct.reviews} reviews)</span>
+                  </div>
+                )}
+                {/* Display Tags */}
+                {selectedProduct.tags && selectedProduct.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-8">
+                        {selectedProduct.tags.map((tag, i) => (
+                            <span key={i} className="text-[8px] font-black uppercase tracking-wider bg-white/5 px-2 py-1 border border-white/10 text-slate-400">
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
                 <div className="space-y-4">
-                  <button 
+                  <button
                     onClick={() => sounds.playClick()}
                     className="w-full bg-primary text-black py-5 font-black text-xs uppercase tracking-widest hover:bg-white transition-all transform active:scale-95 shadow-xl"
                   >
                     Authorize Helix Sync
                   </button>
-                  <button 
+                  <button
                     onClick={handleSpeak}
                     disabled={!intelReport || isSpeaking}
                     className={`w-full border py-4 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-30 group ${error ? 'bg-safety-orange/10 border-safety-orange/30 text-safety-orange hover:bg-safety-orange hover:text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
@@ -255,7 +210,7 @@ const ProtocolStore: React.FC = () => {
                   </button>
                 </div>
               </div>
-              
+
               <div className="lg:col-span-8">
                 <div className="mb-10">
                   <h3 className="font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-primary mb-2">{selectedProduct.title}</h3>
@@ -281,7 +236,7 @@ const ProtocolStore: React.FC = () => {
                       ) : error ? (
                         <div className="p-8 border border-safety-orange/20 bg-safety-orange/5 text-safety-orange animate-glitch-subtle">
                            <p className="mb-6 font-bold uppercase tracking-widest">{error}</p>
-                           <button 
+                           <button
                              onClick={() => handleDecompile(selectedProduct)}
                              className="text-[10px] font-black border border-safety-orange px-6 py-2 hover:bg-safety-orange hover:text-black transition-all"
                            >
@@ -289,9 +244,19 @@ const ProtocolStore: React.FC = () => {
                            </button>
                         </div>
                       ) : (
-                        <div className={`whitespace-pre-wrap animate-fade-in border-l-2 pl-8 transition-all duration-1000 ${isSpeaking ? 'border-primary shadow-[inset_10px_0_20px_-10px_rgba(0,255,127,0.1)]' : 'border-primary/20'}`}>
-                          {intelReport}
-                        </div>
+                        <>
+                          <div className={`whitespace-pre-wrap animate-fade-in border-l-2 pl-8 transition-all duration-1000 ${isSpeaking ? 'border-primary shadow-[inset_10px_0_20px_-10px_rgba(0,255,127,0.1)]' : 'border-primary/20'}`}>
+                            {intelReport}
+                          </div>
+                          {selectedProduct.longDescriptionHtml && (
+                              <div className="mt-8 border-t border-white/10 pt-8">
+                                  <h4 className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/60 mb-4 flex items-center gap-3">
+                                      <span className="h-px w-8 bg-primary/20"></span> Raw Biological Protocol
+                                  </h4>
+                                  <div dangerouslySetInnerHTML={{ __html: selectedProduct.longDescriptionHtml }} className="prose-invert max-w-none text-slate-300"></div>
+                              </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>

@@ -7,46 +7,9 @@
     <title>HELLO HEALTHY // Vitality Optimization Pulse</title>
     <meta name="description" content="High-performance biological auditing and neural synergy collective.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Pulse Identity Icon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 50 Q 25 50 30 40 T 40 60 T 50 20 T 60 80 T 70 50 L 90 50' stroke='%2300FF7F' stroke-width='6' fill='none'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#00FF7F",
-                        "background-dark": "#050505",
-                        "surface-dark": "#121212",
-                        "safety-orange": "#FF8C00",
-                        "interface-gray": "#262626",
-                    },
-                    fontFamily: {
-                        "display": ["Space Grotesk", "sans-serif"],
-                        "sans": ["Noto Sans", "sans-serif"],
-                        "mono": ["JetBrains Mono", "monospace"]
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                        'shimmer': 'shimmer 2s linear infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        },
-                        shimmer: {
-                            '0%': { transform: 'translateX(-100%)' },
-                            '100%': { transform: 'translateX(100%)' }
-                        }
-                    }
-                },
-            },
-        }
-    </script>
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
@@ -58,10 +21,16 @@
             text-shadow: 0 0 30px rgba(0, 255, 127, 0.6);
         }
         .grainy-overlay {
-            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCYm8bpVMp3zgh88IMXrNDT78VKt-lQW01NBjX1WYsX3jVxzqHbxAlE4F9TRQxZ0vmq2NJxA16JrV9pHRqEycVlhvKYjmX4vq-KVXbrh9BosPqeXaKZ7z33vVQxX4TvJIdf1K4GlubGFYrPDRZ_ahItV7l3oTbULxr-VUO_MlXEMwJ0bbLNVpWzo_dduyZfR-RKtyS2GRatvb2ZwTWgtOJVzqZTlTpzGo_JG0vyS3v6DxK_D_XTEaaNFlQqEU_hINIfQ-J4LJdzHr4);
-            filter: contrast(120%) brightness(100%);
-            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
             pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+        }
+        .manifesto-stroke {
+            -webkit-text-stroke: 1px rgba(0, 255, 127, 0.2);
+            color: transparent;
         }
         @keyframes heartbeat {
             0% { transform: scale(1); opacity: 0.3; }
@@ -87,6 +56,50 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #00FF7F;
         }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        /* Prose styles for dynamically injected HTML content */
+        .prose-invert p, .prose-invert ul, .prose-invert ol, .prose-invert h2, .prose-invert h3, .prose-invert h4, .prose-invert strong {
+            color: #cbd5e1; /* slate-300 */
+            margin-bottom: 1em;
+        }
+        .prose-invert h2, .prose-invert h3, .prose-invert h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: #00FF7F; /* primary */
+            margin-top: 1.5em;
+        }
+        .prose-invert ul, .prose-invert ol {
+            list-style-position: inside;
+            padding-left: 1.5em;
+            list-style-type: disc; /* Default to disc for ul */
+        }
+        .prose-invert ol {
+            list-style-type: decimal; /* Default to decimal for ol */
+        }
+        .prose-invert li {
+            margin-bottom: 0.5em;
+        }
+        .prose-invert a {
+            color: #00FF7F;
+            text-decoration: underline;
+        }
+        .prose-invert strong {
+            font-weight: bold;
+        }
+        /* For images inside prose */
+        .prose-invert img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 1em;
+            margin-bottom: 1em;
+            border-radius: 0.5em;
+            display: block; /* Ensure images take full width of their container */
+        }
     </style>
 <script type="importmap">
 {
@@ -104,6 +117,7 @@
 </head>
 <body class="bg-background-dark text-slate-100 selection:bg-primary selection:text-background-dark overflow-x-hidden">
     <div id="root"></div>
+    <div class="grainy-overlay"></div>
     <script type="module" src="index.tsx"></script>
 </body>
 </html>

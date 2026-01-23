@@ -19,11 +19,17 @@ export interface ChatMessage {
 export interface Product {
   handle: string;
   title: string;
-  price: string;
+  price: number;
   sku: string;
-  image: string;
+  image: string; // Primary image for product card
+  images: string[]; // All images for the product
   category: string;
-  description: string;
+  description: string; // Short plain text description
+  longDescriptionHtml: string; // Full HTML description from CSV
+  tags: string[]; // Extracted from HTML badges
+  rating: number; // Randomly generated
+  reviews: number; // Randomly generated
+  vendor: string;
 }
 
 export interface UserProfile {
