@@ -3,61 +3,117 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../services/products';
 import { sounds } from '../services/ui-sounds';
+import { generateProductVideo, NeuralLinkError } from '../services/gemini';
+
+const CATEGORIES = [
+  "ALL SECTORS",
+  "Amino Acids & Blends",
+  "Proteins & Blends",
+  "Specialty Supplements",
+  "Natural Extracts"
+];
 
 const ProtocolStore: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("ALL SECTORS");
+
+  // Video State Management
+  const [videoPreviews, setVideoPreviews] = useState<Record<string, string>>({});
+  const [loadingVideos, setLoadingVideos] = useState<Record<string, boolean>>({});
+  const [videoStatus, setVideoStatus] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const filteredProducts = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim();
-    if (!query) return PRODUCTS;
-    return PRODUCTS.filter(product => 
-      product.title.toLowerCase().includes(query) || 
-      product.category.toLowerCase().includes(query) ||
-      product.sku.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    return PRODUCTS.filter(product => {
+      const matchesSearch = 
+        product.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = 
+        selectedCategory === "ALL SECTORS" || 
+        product.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
 
   const handleProductClick = (handle: string) => {
     sounds.playClick();
     navigate(`/protocol/${handle}`);
   };
 
+  const handleGenerateVideo = async (e: React.MouseEvent, product: any) => {
+    e.stopPropagation(); // Prevent navigation to detail page
+    if (loadingVideos[product.handle]) return;
+
+    sounds.playInject();
+    setLoadingVideos(prev => ({ ...prev, [product.handle]: true }));
+    setErrors(prev => ({ ...prev, [product.handle]: '' }));
+    
+    try {
+      const url = await generateProductVideo(product.title, (status) => {
+        setVideoStatus(prev => ({ ...prev, [product.handle]: status }));
+      });
+      setVideoPreviews(prev => ({ ...prev, [product.handle]: url }));
+      sounds.playBlip();
+    } catch (err) {
+      const msg = err instanceof NeuralLinkError ? err.message : "Video node offline";
+      setErrors(prev => ({ ...prev, [product.handle]: msg }));
+    } finally {
+      setLoadingVideos(prev => ({ ...prev, [product.handle]: false }));
+    }
+  };
+
   return (
     <section id="protocols" className="py-40 bg-background-dark relative">
-      {/* Background Decorative Element */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-20"></div>
+      {/* Structural depth lines */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
       
       <div className="max-w-[1440px] mx-auto px-8">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-10">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-24 gap-12">
           <div className="reveal-on-scroll">
-            <p className="text-primary font-bold tracking-[0.4em] uppercase mb-6 text-xs flex items-center gap-4">
-              <span className="w-6 h-[1px] bg-primary"></span>
+            <p className="text-primary font-black tracking-[0.5em] uppercase mb-6 text-[10px] flex items-center gap-4">
+              <span className="w-8 h-[1px] bg-primary"></span>
               Proprietary Bio-Strands
             </p>
-            <h2 className="font-display text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none text-white text-glow">
+            <h2 className="font-display text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none text-white text-glow">
               Protocol <span className="text-primary italic">Helix</span>
             </h2>
           </div>
-          <div className="flex flex-col sm:flex-row gap-6 w-full md:w-auto">
-             <div className="relative group">
-                <input 
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="SEARCH VITALITY SECTOR..."
-                  className="bg-surface-dark border border-white/10 px-8 py-6 pl-16 text-[11px] font-mono tracking-[0.3em] uppercase focus:border-primary outline-none transition-all w-full sm:min-w-[420px] text-white focus:shadow-[0_0_30px_rgba(0,255,127,0.15)] placeholder:text-zinc-700"
-                />
-                <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600 text-2xl group-focus-within:text-primary transition-colors">dna</span>
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-xl">close</span>
-                  </button>
-                )}
-             </div>
+
+          <div className="w-full xl:w-auto space-y-8">
+            {/* Category Navigation Bar */}
+            <div className="flex flex-wrap gap-4 border-b border-white/5 pb-8">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => { sounds.playBlip(); setSelectedCategory(cat); }}
+                  className={`px-6 py-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all relative group ${
+                    selectedCategory === cat 
+                    ? 'text-primary' 
+                    : 'text-neutral-500 hover:text-white'
+                  }`}
+                >
+                  {cat}
+                  {selectedCategory === cat && (
+                    <span className="absolute -bottom-[1px] left-0 w-full h-[2px] bg-primary shadow-[0_0_10px_#00FF7F]"></span>
+                  )}
+                  <span className="absolute -top-1 -right-1 size-1 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                </button>
+              ))}
+            </div>
+
+            <div className="relative group">
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="SEARCH VITALITY SECTOR..."
+                className="bg-neutral-900/30 border border-white/10 px-8 py-6 pl-16 text-[11px] font-mono tracking-[0.3em] uppercase focus:border-primary outline-none transition-all w-full lg:min-w-[500px] text-white focus:shadow-[0_0_40px_rgba(0,255,127,0.1)] placeholder:text-neutral-800"
+              />
+              <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-neutral-700 text-2xl group-focus-within:text-primary transition-colors">dna</span>
+            </div>
           </div>
         </div>
 
@@ -67,31 +123,83 @@ const ProtocolStore: React.FC = () => {
               <div 
                 key={product.handle} 
                 onClick={() => handleProductClick(product.handle)}
-                className="group cursor-pointer relative bg-surface-dark border border-white/5 hover:border-primary/40 transition-all duration-700 hover:-translate-y-4 shadow-3xl overflow-hidden"
-                style={{ animationDelay: `${idx * 150}ms` }}
+                className="group cursor-pointer relative bg-neutral-900/20 border border-white/5 hover:border-primary/40 transition-all duration-700 hover:-translate-y-4 shadow-3xl overflow-hidden"
+                style={{ animationDelay: `${idx * 100}ms` }}
               >
                 <div className="aspect-[4/5] overflow-hidden bg-black relative">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    loading="lazy"
-                    className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[1.5s] grayscale group-hover:grayscale-0" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80 group-hover:opacity-30 transition-opacity"></div>
+                  {videoPreviews[product.handle] ? (
+                    <video 
+                      src={videoPreviews[product.handle]} 
+                      autoPlay 
+                      loop 
+                      muted 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src={product.image} 
+                      alt={product.title} 
+                      loading="lazy"
+                      className="w-full h-full object-cover opacity-30 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[1.5s] grayscale group-hover:grayscale-0" 
+                    />
+                  )}
                   
-                  <div className="absolute top-6 left-6 flex gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-widest bg-background-dark/90 px-4 py-2 border border-white/10 text-primary backdrop-blur-lg">
+                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90 group-hover:opacity-40 transition-opacity"></div>
+                  
+                  <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest bg-black/90 px-4 py-2 border border-white/10 text-primary backdrop-blur-md">
                       {product.sku}
                     </p>
+                    {videoPreviews[product.handle] && (
+                      <span className="text-[7px] font-black uppercase tracking-[0.4em] text-primary bg-primary/10 border border-primary/20 px-2 py-1 w-fit backdrop-blur-md animate-pulse">
+                        Live Preview Active
+                      </span>
+                    )}
                   </div>
 
-                  <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/20 transition-all duration-500 pointer-events-none"></div>
+                  {/* Video Generation Trigger */}
+                  <div className="absolute top-6 right-6 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button 
+                      onClick={(e) => handleGenerateVideo(e, product)}
+                      disabled={loadingVideos[product.handle]}
+                      className="size-12 rounded-full bg-primary text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all group/vbtn border-4 border-black"
+                    >
+                      <span className={`material-symbols-outlined text-2xl font-black ${loadingVideos[product.handle] ? 'animate-spin' : ''}`}>
+                        {loadingVideos[product.handle] ? 'sync' : 'movie_filter'}
+                      </span>
+                      <div className="absolute top-0 right-full mr-4 bg-black border border-primary/30 px-3 py-1 text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden group-hover/vbtn:block text-primary">
+                        {loadingVideos[product.handle] ? 'SYNTHESIZING...' : 'RENDER PREVIEW'}
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Rendering Overlay */}
+                  {loadingVideos[product.handle] && (
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-xl z-20 flex flex-col items-center justify-center p-8 text-center">
+                      <div className="size-16 border-2 border-primary border-t-transparent rounded-full animate-spin mb-6 shadow-[0_0_20px_#00FF7F]"></div>
+                      <p className="text-[9px] text-primary font-black uppercase tracking-[0.4em] animate-pulse">
+                        {videoStatus[product.handle] || "Connecting to Render Node..."}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Error Overlay */}
+                  {errors[product.handle] && (
+                    <div className="absolute inset-0 bg-safety-orange/20 backdrop-blur-xl z-20 flex flex-col items-center justify-center p-8 text-center">
+                      <span className="material-symbols-outlined text-safety-orange text-4xl mb-4">report</span>
+                      <p className="text-[8px] text-white font-black uppercase tracking-widest">
+                        {errors[product.handle]}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/10 transition-all duration-500 pointer-events-none"></div>
                 </div>
 
-                <div className="p-10 relative bg-surface-dark/95 backdrop-blur-md">
+                <div className="p-10 relative bg-neutral-900/40 backdrop-blur-md border-t border-white/5">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="size-1.5 rounded-full bg-primary animate-pulse"></span>
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] group-hover:text-zinc-300 transition-colors">{product.category}</p>
+                    <span className="size-1 rounded-full bg-primary animate-pulse"></span>
+                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.3em] group-hover:text-white transition-colors">{product.category}</p>
                   </div>
                   <h3 className="font-display text-3xl font-bold uppercase tracking-tight mb-10 group-hover:text-primary transition-colors min-h-[72px] leading-none text-white">
                     {product.title}
@@ -99,8 +207,8 @@ const ProtocolStore: React.FC = () => {
                   
                   <div className="flex items-center justify-between border-t border-white/5 pt-8">
                     <p className="font-mono text-3xl font-black text-white">${product.price}</p>
-                    <div className="group/btn relative px-8 py-4 overflow-hidden border border-primary/30">
-                      <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] group-hover/btn:text-black transition-colors text-white">Open Matrix</span>
+                    <div className="group/btn relative px-8 py-4 overflow-hidden border border-white/10 group-hover:border-primary transition-colors">
+                      <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] group-hover/btn:text-black transition-colors text-neutral-300">Open Matrix</span>
                       <div className="absolute inset-0 bg-primary translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500"></div>
                     </div>
                   </div>
@@ -109,10 +217,10 @@ const ProtocolStore: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="py-48 text-center border border-dashed border-white/10 bg-white/[0.02] animate-pulse rounded-2xl">
-            <span className="material-symbols-outlined text-8xl text-zinc-800 mb-10">satellite_alt</span>
-            <h4 className="font-display text-3xl font-bold uppercase text-white mb-4">Sector Unresponsive</h4>
-            <p className="font-mono text-xs uppercase tracking-[0.5em] text-zinc-600">Search query returned zero vitality hits in the protocol helix.</p>
+          <div className="py-48 text-center border border-dashed border-white/5 bg-white/[0.01] animate-pulse rounded-2xl">
+            <span className="material-symbols-outlined text-8xl text-neutral-900 mb-10">satellite_alt</span>
+            <h4 className="font-display text-3xl font-bold uppercase text-neutral-700 mb-4 tracking-tighter">Sector Unresponsive</h4>
+            <p className="font-mono text-xs uppercase tracking-[0.5em] text-neutral-800">Search query returned zero vitality hits in the protocol helix.</p>
           </div>
         )}
       </div>

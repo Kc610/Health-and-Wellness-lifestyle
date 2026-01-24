@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../services/products';
-import { generateProductIntel, speakProtocol, NeuralLinkError } from '../services/gemini';
+import { generateProductIntel, speakProtocol, NeuralLinkError, generateProductVideo } from '../services/gemini';
 import { sounds } from '../services/ui-sounds';
 import Logo from './Logo';
 
@@ -15,6 +15,11 @@ const ProductDetail: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [videoStatus, setVideoStatus] = useState("");
+  
   const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
@@ -22,6 +27,9 @@ const ProductDetail: React.FC = () => {
     return () => {
       if (currentAudioSource.current) {
         currentAudioSource.current.stop();
+      }
+      if (videoUrl && videoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(videoUrl);
       }
     };
   }, [handle]);
@@ -79,6 +87,22 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  const handleGenerateVideo = async () => {
+    if (isVideoLoading) return;
+    sounds.playInject();
+    setIsVideoLoading(true);
+    setVideoStatus("Initializing Veo Node...");
+    try {
+      const url = await generateProductVideo(product.title, (status) => setVideoStatus(status));
+      setVideoUrl(url);
+      sounds.playBlip();
+    } catch (e) {
+      setError(e instanceof NeuralLinkError ? e.message : "VIDEO KINETIC FAIL");
+    } finally {
+      setIsVideoLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background-dark text-white pt-32 pb-20 selection:bg-primary selection:text-black">
       <div className="max-w-7xl mx-auto px-8">
@@ -97,14 +121,26 @@ const ProductDetail: React.FC = () => {
           <div className="lg:col-span-6 space-y-10">
             <div className="aspect-square bg-surface-dark border border-white/10 relative overflow-hidden group">
               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
-              <img 
-                src={product.image} 
-                alt={`${product.title} high-resolution visual`}
-                className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
-              />
+              
+              {videoUrl ? (
+                <video 
+                  src={videoUrl} 
+                  autoPlay 
+                  loop 
+                  muted 
+                  className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-1000"
+                />
+              ) : (
+                <img 
+                  src={product.image} 
+                  alt={`${product.title} high-resolution visual`}
+                  className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
+                />
+              )}
+
               <div className="absolute top-6 left-6 z-20">
                 <span className="bg-black/80 backdrop-blur-md border border-primary/30 px-4 py-2 text-[10px] font-mono text-primary uppercase tracking-widest">
-                  {product.sku} // COREID
+                  {product.sku} // {videoUrl ? 'KINETIC FEED' : 'COREID'}
                 </span>
               </div>
               
@@ -114,6 +150,13 @@ const ProductDetail: React.FC = () => {
                 <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
                 <div className="absolute top-1/2 left-0 w-full h-[1px] bg-primary/10 animate-scan"></div>
               </div>
+
+              {isVideoLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-3xl z-30">
+                  <div className="size-24 border-2 border-primary border-t-transparent rounded-full animate-spin mb-8"></div>
+                  <p className="text-primary font-mono text-xs font-black uppercase tracking-[0.4em] animate-pulse px-8 text-center">{videoStatus}</p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-6">
@@ -157,12 +200,13 @@ const ProductDetail: React.FC = () => {
                 Secure Dispatch
               </button>
               <button 
-                onClick={handleDecompile}
-                aria-label={`Initialize AI analysis of the biological strands for ${product.title}`}
-                className="flex-1 border border-primary/30 bg-primary/5 text-primary py-6 font-black text-xs uppercase tracking-[0.3em] hover:bg-primary/10 transition-all flex items-center justify-center gap-3"
+                onClick={handleGenerateVideo}
+                disabled={isVideoLoading}
+                aria-label="Generate a kinetic neural video preview of this supplement"
+                className="flex-1 border border-primary/30 bg-primary/5 text-primary py-6 font-black text-xs uppercase tracking-[0.3em] hover:bg-primary/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
               >
-                <span className="material-symbols-outlined" aria-hidden="true">analytics</span>
-                Analyze Strands
+                <span className="material-symbols-outlined" aria-hidden="true">movie_filter</span>
+                {videoUrl ? 'Re-generate Video' : 'Kinetic Preview'}
               </button>
             </div>
 
@@ -203,9 +247,18 @@ const ProductDetail: React.FC = () => {
                        <span className="material-symbols-outlined text-safety-orange text-4xl mb-4" aria-hidden="true">report</span>
                        <p className="text-safety-orange uppercase font-black text-xs tracking-widest">{error}</p>
                     </div>
-                  ) : (
+                  ) : intelReport ? (
                     <div className={`animate-fade-in transition-all duration-700 ${isSpeaking ? 'text-primary drop-shadow-[0_0_8px_rgba(0,255,127,0.3)]' : ''}`}>
                       {intelReport}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 flex flex-col items-center gap-6">
+                      <button 
+                        onClick={handleDecompile}
+                        className="text-primary hover:text-white font-black text-xs tracking-[0.4em] uppercase border-b border-primary/20 pb-2 transition-colors"
+                      >
+                        [ Initialize Intel Scan ]
+                      </button>
                     </div>
                   )}
                 </div>

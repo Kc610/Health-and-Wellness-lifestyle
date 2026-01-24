@@ -219,6 +219,73 @@ export const analyzeVideoKinetic = async (frames: string[]) => {
   }
 };
 
+/**
+ * Veo Video Generation for Product kinetic previews
+ */
+export const generateProductVideo = async (productTitle: string, onStatusUpdate?: (status: string) => void) => {
+  loadingTracker.start();
+  
+  // 1. Mandatory API Key Selection for Veo
+  const aistudio = (window as any).aistudio;
+  if (aistudio && typeof aistudio.hasSelectedApiKey === 'function') {
+    const hasSelected = await aistudio.hasSelectedApiKey();
+    if (!hasSelected) {
+      if (onStatusUpdate) onStatusUpdate("Awaiting project billing authorization...");
+      await aistudio.openSelectKey();
+      // Proceeding assuming success due to race condition instructions
+    }
+  }
+
+  // Create fresh instance to ensure up-to-date key
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+  try {
+    if (onStatusUpdate) onStatusUpdate("Initializing Veo Render Node...");
+    let operation = await ai.models.generateVideos({
+      model: 'veo-3.1-fast-generate-preview',
+      prompt: `A cinematic, ultra-high-definition slow motion product shot of ${productTitle}, a premium biological supplement. The bottle is surrounded by flowing green kinetic energy pulses and floating cellular structures in a dark, futuristic laboratory. Professional lighting, 4k resolution, bokeh.`,
+      config: {
+        numberOfVideos: 1,
+        resolution: '720p',
+        aspectRatio: '16:9'
+      }
+    });
+
+    const reassuringMessages = [
+      "Synthesizing Biological Kinetic Patterns...",
+      "Ray-tracing Cellular Structures...",
+      "Stabilizing Temporal Flux...",
+      "Finalizing Vitality Visualization...",
+      "Encoding Neural Stream..."
+    ];
+    let messageIdx = 0;
+
+    while (!operation.done) {
+      if (onStatusUpdate) {
+        onStatusUpdate(reassuringMessages[messageIdx % reassuringMessages.length]);
+        messageIdx++;
+      }
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      operation = await ai.operations.getVideosOperation({ operation: operation });
+    }
+
+    const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+    if (!downloadLink) throw new Error("Video generation failed: No link returned.");
+
+    const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+    const videoBlob = await response.blob();
+    return URL.createObjectURL(videoBlob);
+  } catch (err: any) {
+    if (err.message?.includes("Requested entity was not found")) {
+      // Reset key state if billing/entity issue
+      if (aistudio) await aistudio.openSelectKey();
+    }
+    throw new NeuralLinkError("Kinetic visualization core failure.", "VIDEO_GEN_FAIL");
+  } finally {
+    loadingTracker.end();
+  }
+};
+
 export const createOptimizationChat = () => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   return ai.chats.create({
