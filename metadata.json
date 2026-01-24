@@ -1,9 +1,8 @@
 {
-  "name": "HELLO HEALTHY // Vitality Helix",
-  "description": "The peak of biological optimization. High-fidelity neural monitoring, kinetic audits, and collective intelligence strands.",
+  "name": "Hello Healthy | Vitality Optimization Pulse",
+  "description": "A high-performance biological optimization platform featuring AI-driven vitality leaks, real-time pulse monitoring, and a neural synergy assistant.",
   "requestFramePermissions": [
     "camera",
-    "microphone",
-    "geolocation"
+    "microphone"
   ]
 }

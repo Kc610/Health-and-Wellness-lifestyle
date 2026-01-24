@@ -128,13 +128,13 @@ export const generateOptimizationLogs = async () => {
   }
 };
 
-export const generateProductIntel = async (productTitle: string, descriptionOrHtml: string) => {
+export const generateProductIntel = async (productTitle: string, baseDescription: string) => {
   loadingTracker.start();
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `Generate a high-tech "Vitality Intel Report" for: ${productTitle}. Key information: ${descriptionOrHtml}. Focus on its biological optimization aspects, benefits, and scientific backing. Use cold, futuristic terminology.` }] }],
+      contents: [{ parts: [{ text: `Generate a high-tech "Vitality Intel Report" for: ${productTitle}. Info: ${baseDescription}. Use cold, futuristic terminology.` }] }],
     });
     return response.text || "INTEL DECRYPTION FAILED.";
   } catch (err) {
@@ -204,8 +204,8 @@ export const analyzeVideoKinetic = async (frames: string[]) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const parts = [
-      { text: "Analyze this kinetic sequence for vitality performance. Focus on movement efficiency, energy expenditure, and biological markers. Provide a detailed 'VITALITY PERFORMANCE AUDIT' in a high-tech, analytical tone." },
       ...frames.map(data => ({ inlineData: { mimeType: "image/jpeg", data } })),
+      { text: "Analyze this kinetic sequence. Provide a 'VITALITY PERFORMANCE AUDIT'." }
     ];
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',

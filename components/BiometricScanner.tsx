@@ -1,7 +1,6 @@
 
-
 import React, { useState, useRef, useEffect } from 'react';
-import { analyzeBiometrics, NeuralLinkError } from '../services/gemini';
+import { analyzeBiometrics } from '../services/gemini';
 import { sounds } from '../services/ui-sounds';
 
 const BiometricScanner: React.FC = () => {
@@ -28,23 +27,18 @@ const BiometricScanner: React.FC = () => {
   const handleScan = async () => {
     sounds.playInject();
     setIsCapturing(true);
-    setAnalysis(null);
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
         context.drawImage(videoRef.current, 0, 0, 400, 300);
         const base64 = canvasRef.current.toDataURL('image/jpeg').split(',')[1];
         
+        // Visual effect
         setIsScanning(true);
-        try {
-          const result = await analyzeBiometrics(base64);
-          setAnalysis(result);
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setIsScanning(false);
-          sounds.playBlip();
-        }
+        const result = await analyzeBiometrics(base64);
+        setAnalysis(result);
+        setIsScanning(false);
+        sounds.playBlip();
       }
     }
     setIsCapturing(false);
@@ -57,142 +51,121 @@ const BiometricScanner: React.FC = () => {
   }, [hasPermission]);
 
   return (
-    <section className="py-32 bg-black border-y border-white/5 relative overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-        <div className="order-2 lg:order-1">
-          <p className="text-primary font-bold tracking-[0.5em] uppercase mb-8 text-xs flex items-center gap-4">
-            <span className="w-12 h-px bg-primary"></span>
-            Biometric Baseline Audit
+    <section className="py-24 bg-black border-y border-white/10 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p className="text-primary font-bold tracking-[0.3em] uppercase mb-6 text-sm flex items-center gap-4">
+            <span className="w-8 h-px bg-primary"></span>
+            Biometric Audit
           </p>
-          <h3 className="font-display text-6xl font-black mb-10 uppercase tracking-tighter leading-tight">
-            Transcend Your <br/><span className="text-primary italic text-glow animate-pulse">Limitations.</span>
+          <h3 className="font-display text-5xl font-bold mb-8 uppercase tracking-tighter">
+            Audit Your <br/><span className="text-primary">Genetic Hardware.</span>
           </h3>
-          <p className="text-slate-400 text-xl font-light leading-relaxed mb-12 max-w-lg">
-            Connect your neural node to our vision core for a sub-cellular biological optimization audit. 
-            Identify performance bottlenecks in your metabolic circuitry and neural flow.
+          <p className="text-slate-400 text-lg font-light leading-relaxed mb-10 max-w-md">
+            Connect your neural node to our vision core for a real-time biological optimization audit. 
+            Identify bottlenecks in your metabolic and neural circuitry.
           </p>
 
           {!hasPermission && (
             <button 
               onClick={() => { sounds.playClick(); setHasPermission(true); }}
-              className="group relative bg-primary text-black px-12 py-6 font-black text-xs tracking-[0.4em] uppercase overflow-hidden hover:bg-white transition-all flex items-center gap-4 shadow-[0_0_30px_rgba(0,255,127,0.2)]"
+              className="bg-primary text-black px-10 py-5 font-black text-xs tracking-widest uppercase hover:bg-white transition-all flex items-center gap-3"
             >
-              <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">biotech</span>
-              <span className="relative z-10">Link Optical Hardware</span>
-              <div className="absolute inset-0 bg-white translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+              <span className="material-symbols-outlined">videocam</span>
+              Initialize Optical Sync
             </button>
           )}
 
           {analysis && (
-            <div className="p-10 border border-primary/20 bg-primary/5 font-mono animate-glitch relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-30">
-                <span className="material-symbols-outlined text-4xl text-primary animate-pulse">verified</span>
-              </div>
-              <div className="grid grid-cols-2 gap-10 mb-10">
+            <div className="p-8 border border-primary/30 bg-primary/5 font-mono animate-fade-in">
+              <div className="grid grid-cols-2 gap-8 mb-8">
                 <div>
-                  <p className="text-[9px] text-primary/60 uppercase tracking-widest mb-2 font-black">Genetic Archetype</p>
-                  <p className="text-2xl font-bold uppercase tracking-tight text-white">{analysis.geneticTier}</p>
+                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Genetic Tier</p>
+                  <p className="text-xl font-bold uppercase">{analysis.geneticTier}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-primary/60 uppercase tracking-widest mb-2 font-black">Neural Latency</p>
-                  <p className="text-2xl font-bold uppercase tracking-tight text-white">{analysis.neuralLatency}</p>
+                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Neural Latency</p>
+                  <p className="text-xl font-bold uppercase">{analysis.neuralLatency}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-primary/60 uppercase tracking-widest mb-2 font-black">Metabolic Flow</p>
-                  <p className="text-2xl font-bold uppercase tracking-tight text-white">{analysis.metabolicEfficiency}</p>
+                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Metabolic Efficiency</p>
+                  <p className="text-xl font-bold uppercase">{analysis.metabolicEfficiency}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-primary/60 uppercase tracking-widest mb-2 font-black">Link State</p>
-                  <p className="text-2xl font-bold uppercase text-primary animate-pulse font-black">SYNCED</p>
+                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Status</p>
+                  <p className="text-xl font-bold uppercase text-primary">AUDITED</p>
                 </div>
               </div>
-              <div className="border-t border-primary/20 pt-8">
-                 <p className="text-[9px] text-primary/50 uppercase tracking-[0.3em] mb-3 font-black">Protocol Recommendation:</p>
-                 <p className="text-sm leading-relaxed italic text-slate-300">
-                    "{analysis.protocolRecommendation}"
-                 </p>
-              </div>
+              <p className="text-xs leading-relaxed italic text-slate-300 border-t border-primary/20 pt-4">
+                "{analysis.protocolRecommendation}"
+              </p>
             </div>
           )}
         </div>
 
-        <div className="order-1 lg:order-2 flex flex-col items-center">
-          <div className="relative group w-full max-w-lg">
-            {/* Visual Scan Area */}
-            <div className="aspect-square relative rounded-full overflow-hidden border-[12px] border-white/5 shadow-2xl group-hover:border-primary/20 transition-all duration-700 bg-surface-dark">
-              {!hasPermission ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-700 gap-6">
-                  <span className="material-symbols-outlined text-9xl opacity-10">sensors_off</span>
-                  <p className="text-[10px] font-black uppercase tracking-[0.5em] opacity-30">Awaiting Neural Link...</p>
-                </div>
-              ) : (
-                <video 
-                  ref={videoRef} 
-                  autoPlay 
-                  muted 
-                  playsInline 
-                  className={`w-full h-full object-cover scale-x-[-1] transition-all duration-700 ${isScanning ? 'blur-2xl scale-110 opacity-50' : ''}`}
-                />
-              )}
-              
-              {/* Scan Overlay HUD */}
-              <div className="absolute inset-0 pointer-events-none">
-                <div className={`absolute top-0 left-0 w-full h-full bg-primary/10 transition-opacity duration-700 ${isScanning ? 'opacity-100' : 'opacity-0'}`}></div>
-                
-                {/* Scanner Line Animation */}
-                {hasPermission && (
-                   <div className="absolute top-0 left-0 w-full h-1/2 border-b-2 border-primary/40 bg-gradient-to-b from-primary/5 to-transparent animate-scan shadow-[0_5px_15px_rgba(0,255,127,0.4)]"></div>
-                )}
-                
-                {/* HUD Elements */}
-                <div className="absolute top-8 left-8 size-20 border-t-2 border-l-2 border-primary/30"></div>
-                <div className="absolute top-8 right-8 size-20 border-t-2 border-r-2 border-primary/30"></div>
-                <div className="absolute bottom-8 left-8 size-20 border-b-2 border-l-2 border-primary/30"></div>
-                <div className="absolute bottom-8 right-8 size-20 border-b-2 border-r-2 border-primary/30"></div>
-
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="size-1.5 rounded-full bg-red-500 animate-ping"></div>
-                    <div className="text-[8px] font-black text-red-500/80 uppercase tracking-[0.4em]">LIVE SYNC // NODE-07</div>
-                  </div>
-                </div>
-
-                {/* Rotating Compass / Radar */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                   <div className="size-[80%] border border-dashed border-primary rounded-full animate-[spin_20s_linear_infinite]"></div>
-                   <div className="size-[60%] border border-primary/40 rounded-full animate-[spin_10s_linear_infinite_reverse]"></div>
-                </div>
+        <div className="relative group">
+          <div className="aspect-square max-w-md mx-auto relative rounded-full overflow-hidden border-4 border-white/10 group-hover:border-primary/50 transition-colors">
+            {!hasPermission ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-surface-dark text-slate-700">
+                <span className="material-symbols-outlined text-8xl">sensors_off</span>
               </div>
-
-              {isScanning && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
-                  <div className="size-28 relative mb-6">
-                    <div className="absolute inset-0 border-[6px] border-primary border-t-transparent rounded-full animate-spin"></div>
-                    <div className="absolute inset-4 border-[2px] border-primary/20 rounded-full animate-pulse"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                       <span className="material-symbols-outlined text-primary text-4xl">database</span>
-                    </div>
-                  </div>
-                  <p className="text-primary font-mono text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">De-Coding Genome...</p>
-                </div>
-              )}
+            ) : (
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                muted 
+                playsInline 
+                className={`w-full h-full object-cover scale-x-[-1] ${isScanning ? 'blur-md' : ''}`}
+              />
+            )}
+            
+            {/* HUD Overlays */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-primary/40 animate-scan"></div>
+              <div className="absolute inset-0 border-[40px] border-black/20"></div>
+              <div className="absolute top-10 left-1/2 -translate-x-1/2 flex gap-4">
+                <div className="size-2 rounded-full bg-red-500 animate-pulse"></div>
+                <div className="text-[8px] font-black text-white/50 uppercase tracking-widest">Rec Link Active</div>
+              </div>
             </div>
 
-            <canvas ref={canvasRef} className="hidden" width="400" height="300"></canvas>
-            
-            {hasPermission && !isScanning && (
-              <button 
-                onClick={handleScan}
-                disabled={isCapturing}
-                className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-white text-black size-32 rounded-full font-black text-[10px] flex flex-col items-center justify-center shadow-[0_20px_60px_rgba(0,255,127,0.3)] hover:scale-110 active:scale-90 transition-all group-hover:bg-primary group-hover:text-black z-20 uppercase tracking-[0.3em] border-[6px] border-black outline outline-2 outline-white/10"
-              >
-                <span className="material-symbols-outlined text-4xl mb-1">face_retouching_natural</span>
-                Audit
-              </button>
+            {isScanning && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-primary font-mono text-[10px] font-bold uppercase tracking-[0.5em]">Decompiling Biometrics...</p>
+              </div>
             )}
           </div>
+
+          <canvas ref={canvasRef} className="hidden" width="400" height="300"></canvas>
+          
+          {hasPermission && !isScanning && (
+            <button 
+              onClick={handleScan}
+              disabled={isCapturing}
+              className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white text-black size-20 rounded-full font-black text-[10px] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all group-hover:bg-primary"
+            >
+              SCAN
+            </button>
+          )}
         </div>
       </div>
+      <style>{`
+        @keyframes scan {
+          0% { top: 0; }
+          100% { top: 100%; }
+        }
+        .animate-scan {
+          animation: scan 3s linear infinite;
+        }
+        .animate-fade-in {
+          animation: fadeIn 1s ease-out forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </section>
   );
 };

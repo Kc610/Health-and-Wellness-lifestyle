@@ -4,125 +4,110 @@ import { sounds } from '../services/ui-sounds';
 
 const Hero: React.FC = () => {
   const [scrollY, setScrollY] = useState(0);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [pulseRate, setPulseRate] = useState(72);
+  const [efficiency, setEfficiency] = useState(94.2);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ 
-        x: (e.clientX / window.innerWidth) - 0.5, 
-        y: (e.clientY / window.innerHeight) - 0.5 
-      });
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll);
     
+    const interval = setInterval(() => {
+      setPulseRate(prev => Math.max(60, Math.min(85, prev + (Math.random() - 0.5) * 2)));
+      setEfficiency(prev => Math.max(90, Math.min(99, prev + (Math.random() - 0.5) * 0.1)));
+    }, 2000);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleMouseMove);
+      clearInterval(interval);
     };
   }, []);
 
-  const scrollToProtocols = () => {
-    sounds.playClick();
-    const protocolsSection = document.getElementById('protocols');
-    if (protocolsSection) {
-      protocolsSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
-    <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black pt-20">
-      <div className="absolute inset-0 z-0 overflow-hidden">
+    <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-background-dark">
+      {/* Background Enhancements */}
+      <div className="absolute inset-0 z-0">
         <img 
-          alt="High-performance biology" 
-          className="w-full h-full object-cover opacity-30 transition-transform duration-700 ease-out"
-          style={{ 
-            transform: `scale(${1.05 + scrollY * 0.0002}) translateY(${scrollY * 0.15}px) translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)` 
-          }}
-          src="https://images.unsplash.com/photo-1614728263952-84ea206f99b6?q=80&w=2000&auto=format&fit=crop"
+          alt="High-performance biological visualization" 
+          className="w-full h-full object-cover scale-110 opacity-20 transition-transform duration-1000 ease-out grayscale hover:grayscale-0"
+          style={{ transform: `scale(${1.1 + scrollY * 0.0002}) translateY(${scrollY * 0.1}px)` }}
+          src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=2070"
         />
-        <div className="hero-gradient absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black"></div>
+        <div className="hero-gradient absolute inset-0 z-10"></div>
         
-        {/* Parallax Floating Data Points */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <div 
-              key={i}
-              className="absolute size-px bg-primary/40 rounded-full animate-pulse-slow"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                transform: `translateY(${scrollY * (0.05 + Math.random() * 0.2)}px)`,
-                opacity: 0.1 + Math.random() * 0.4,
-                boxShadow: '0 0 10px #00FF7F'
-              }}
-            ></div>
-          ))}
-        </div>
-
-        {/* Dynamic Grid Floor */}
-        <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ 
+        {/* Animated Digital Grid - Neutralized */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ 
           backgroundImage: 'linear-gradient(#00FF7F 1px, transparent 1px), linear-gradient(90deg, #00FF7F 1px, transparent 1px)',
           backgroundSize: '100px 100px',
-          transform: `perspective(800px) rotateX(60deg) translateY(${scrollY * 0.3}px) translateZ(-100px)`
+          transform: `perspective(1000px) rotateX(60deg) translateY(${scrollY * 0.25}px)`
         }}></div>
       </div>
 
-      {/* Side Status HUD */}
-      <div className="absolute top-1/2 left-12 -translate-y-1/2 hidden xl:flex flex-col gap-12 opacity-50 animate-float pointer-events-none">
-         <div className="space-y-2 border-l border-primary/40 pl-4 py-2 bg-primary/5">
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Core Temp</p>
-            <p className="font-mono text-xl font-bold">37.0°C</p>
-         </div>
-         <div className="space-y-2 border-l border-primary/40 pl-4 py-2 bg-primary/5">
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Neural Load</p>
-            <p className="font-mono text-xl font-bold">12.8%</p>
-         </div>
-         <div className="space-y-2 border-l border-primary/40 pl-4 py-2 bg-primary/5">
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Helix Flow</p>
-            <p className="font-mono text-xl font-bold">A-SYNC</p>
-         </div>
+      {/* Metabolic HUD Overlay - Neutralized */}
+      <div className="absolute top-40 right-12 hidden xl:block animate-float z-20">
+        <div className="p-8 border-l-2 border-primary/40 bg-interface-gray/40 backdrop-blur-2xl space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+          <div className="space-y-1">
+            <p className="text-[8px] font-black text-primary/80 uppercase tracking-[0.4em]">Cardiac Sync</p>
+            <p className="text-4xl font-display font-black text-white">{Math.floor(pulseRate)} <span className="text-[10px] text-zinc-500 tracking-normal">BPM</span></p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[8px] font-black text-primary/80 uppercase tracking-[0.4em]">Metabolic Efficiency</p>
+            <div className="flex items-center gap-3">
+              <p className="text-2xl font-display font-bold text-white">{efficiency.toFixed(1)}%</p>
+              <div className="h-1 w-24 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-primary shadow-[0_0_10px_#00FF7F] transition-all duration-1000" style={{ width: `${efficiency}%` }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div className="relative z-10 max-w-6xl mx-auto px-8 text-center mt-[-10vh]">
-        <div className="inline-flex items-center gap-4 px-6 py-2 mb-12 border border-primary/30 bg-primary/5 text-primary text-[10px] font-black tracking-[0.5em] uppercase rounded-full backdrop-blur-md">
+
+      {/* Main Content */}
+      <div className="relative z-20 max-w-7xl mx-auto px-8 text-center flex flex-col items-center">
+        <div className="inline-flex items-center gap-3 px-8 py-3 mb-16 border border-primary/30 bg-primary/5 backdrop-blur-md rounded-full shadow-[0_0_30px_rgba(0,255,127,0.1)] reveal-on-scroll">
           <span className="size-2 bg-primary rounded-full animate-ping"></span>
-          Vitality Collective // Sector 07 Gamma
+          <span className="text-primary text-[10px] font-black tracking-[0.5em] uppercase">Sector A-1 // Neural Status: Optimized</span>
         </div>
         
-        <h2 className="font-display text-7xl md:text-[11rem] font-black tracking-tighter leading-[0.8] mb-12 drop-shadow-[0_0_80px_rgba(0,255,127,0.3)] select-none">
-          REWRITE <span className="text-primary italic animate-pulse">THE</span><br/>
-          <span className="font-light italic text-white/90">STANDARD.</span>
+        <h2 className="font-display text-7xl md:text-9xl font-black tracking-tighter leading-[0.8] mb-12 drop-shadow-[0_20px_50px_rgba(0,0,0,1)] uppercase text-white text-glow">
+          Evolving the <br/>
+          <span className="text-primary italic relative inline-block group">
+            Human <span className="text-white group-hover:text-primary transition-colors">Pulse</span>
+            <svg className="absolute -bottom-4 left-0 w-full h-3 text-primary/40" viewBox="0 0 400 10" preserveAspectRatio="none">
+              <path d="M0 5 Q 100 0 200 5 T 400 5" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="15 10" />
+            </svg>
+          </span>
         </h2>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+        <p className="max-w-2xl text-lg md:text-xl text-zinc-400 font-light leading-relaxed mb-20 uppercase tracking-[0.15em]">
+          Precision biological protocols designed for the elite collective. <br/>
+          Your transformation into <span className="text-white font-bold tracking-widest">Hello Healthy</span> begins at the cellular level.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-10">
           <button 
-            onClick={() => sounds.playInject()}
-            className="group relative bg-primary text-black px-16 py-8 font-black text-sm tracking-[0.3em] uppercase overflow-hidden shadow-[0_0_50px_rgba(0,255,127,0.4)] hover:scale-105 transition-all active:scale-95"
+            onClick={() => { sounds.playInject(); document.getElementById('protocols')?.scrollIntoView({ behavior: 'smooth' }); }}
+            className="group relative bg-primary text-black px-20 py-8 font-black text-sm tracking-[0.4em] uppercase overflow-hidden shadow-[0_0_60px_rgba(0,255,127,0.3)] hover:scale-105 transition-all"
           >
-            <span className="relative z-10">Initiate Sync</span>
-            <div className="absolute inset-0 bg-white translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
+            <span className="relative z-10 flex items-center gap-4">
+              Access The Helix
+              <span className="material-symbols-outlined text-2xl transition-transform group-hover:translate-x-3">arrow_right_alt</span>
+            </span>
+            <div className="absolute inset-0 bg-white transform translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-500"></div>
           </button>
+          
           <button 
-            onClick={scrollToProtocols} // Changed to scroll to protocols
-            className="bg-white/5 border border-white/10 backdrop-blur-xl text-white px-16 py-8 font-black text-sm tracking-[0.3em] uppercase hover:bg-white/10 transition-all group overflow-hidden relative"
+            onClick={() => sounds.playClick()}
+            className="bg-white/5 border border-white/10 backdrop-blur-2xl text-white px-16 py-8 font-black text-sm tracking-[0.4em] uppercase hover:bg-white/10 transition-all hover:-translate-y-2 group border-b-2 border-b-primary/40"
           >
-            <span className="relative z-10">Access Stacks</span>
-            <div className="absolute inset-0 bg-primary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+            Synergy Thesis
           </button>
-        </div>
-
-        <div className="mt-20 flex justify-center gap-12 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-           {['VO2 OPTIMIZED', 'NEURAL SYNERGY', 'GENETIC AUDIT'].map(tag => (
-             <span key={tag} className="font-mono text-[9px] font-bold tracking-[0.4em] uppercase border-b border-primary/40 pb-1 text-primary">{tag}</span>
-           ))}
         </div>
       </div>
       
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-50 group cursor-pointer" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
-        <p className="text-[9px] font-black uppercase tracking-[0.5em] group-hover:text-primary transition-colors">Vertical Dive</p>
-        <span className="material-symbols-outlined text-4xl group-hover:translate-y-2 transition-transform text-primary">keyboard_double_arrow_down</span>
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 opacity-60">
+        <p className="text-[10px] font-black uppercase tracking-[0.6em] text-white">Initialize Descent</p>
+        <div className="w-[1px] h-16 bg-gradient-to-b from-primary via-primary/50 to-transparent animate-pulse shadow-[0_0_10px_#00FF7F]"></div>
       </div>
     </section>
   );

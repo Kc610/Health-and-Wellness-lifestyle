@@ -1,15 +1,13 @@
-
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenAI, Type, Modality } = require('@google/genai'); // Added Modality
+const { GoogleGenAI, Type } = require('@google/genai');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Initialize GoogleGenAI once
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY }); // Correct initialization
+const genAI = new GoogleGenAI(process.env.API_KEY);
 
 // CENTRALIZED AGENT PERSONA
 const SYSTEM_PROMPT = `You are the Hello Healthy Chief Synergy Agent. 
@@ -21,14 +19,17 @@ Always return responses in the requested JSON format.`;
 app.post('/api/analyze-biometrics', async (req, res) => {
   try {
     const { image } = req.body;
-    const response = await ai.models.generateContent({ // Correct API call
-      model: "gemini-3-flash-preview", // Updated model as per guidelines
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT
+    });
+
+    const result = await model.generateContent({
       contents: [
         { inlineData: { mimeType: "image/jpeg", data: image } },
         { text: "Perform vitality audit on this specimen." }
       ],
-      config: { // Correct config object
-        systemInstruction: SYSTEM_PROMPT,
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -41,15 +42,10 @@ app.post('/api/analyze-biometrics', async (req, res) => {
         }
       }
     });
-    // Correct way to get text
-    const text = response.text;
-    if (!text) {
-      throw new Error("No text response from model");
-    }
-    res.json(JSON.parse(text)); 
+    res.json(JSON.parse(result.response.text()));
   } catch (error) {
     console.error("Link Error:", error);
-    res.status(500).json({ error: "Biometric Core Offline", details: error.message });
+    res.status(500).json({ error: "Biometric Core Offline" });
   }
 });
 
@@ -57,22 +53,18 @@ app.post('/api/analyze-biometrics', async (req, res) => {
 app.post('/api/speak-protocol', async (req, res) => {
   try {
     const { text } = req.body;
-    const response = await ai.models.generateContent({ // Correct API call
-      model: "gemini-2.5-flash-preview-tts", // Updated model as per guidelines
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const result = await model.generateContent({
       contents: [{ parts: [{ text: `System Broadcast: ${text}` }] }],
-      config: { // Correct config object
-        responseModalities: [Modality.AUDIO], // Use Modality enum
+      generationConfig: {
+        responseModalities: ["AUDIO"],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } }
       }
     });
-    const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data; // Correct way to get data
-    if (!audioData) {
-      throw new Error("No audio data returned from model");
-    }
+    const audioData = result.response.candidates[0].content.parts[0].inlineData.data;
     res.json({ audio: audioData });
   } catch (error) {
-    console.error("Voice Core Failure:", error);
-    res.status(500).json({ error: "Voice Core Failure", details: error.message });
+    res.status(500).json({ error: "Voice Core Failure" });
   }
 });
 

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { generateIntelLeaks } from '../services/gemini';
 
@@ -13,8 +12,7 @@ const IntelTicker: React.FC = () => {
     try {
       const data = await generateIntelLeaks();
       setLeaks(data);
-      // Check if any leak indicates a buffering state or problem
-      setIsStale(data.some(l => l.includes('BUFFERING') || l.includes('ERROR'))); 
+      setIsStale(data.some(l => l.includes('BUFFERING')));
     } catch (e) {
       setIsStale(true);
     } finally {
@@ -24,7 +22,7 @@ const IntelTicker: React.FC = () => {
 
   useEffect(() => {
     fetchLeaks();
-    const interval = setInterval(fetchLeaks, 60000); // Refresh every minute
+    const interval = setInterval(fetchLeaks, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -43,6 +41,15 @@ const IntelTicker: React.FC = () => {
           </span>
         ))}
       </div>
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 40s linear infinite;
+        }
+      `}</style>
     </div>
   );
 };

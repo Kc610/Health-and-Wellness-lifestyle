@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Logo from './Logo';
 import { sounds } from '../services/ui-sounds';
 
@@ -11,66 +11,63 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenProfile, onOpenVideo }) => {
-  const scrollToSection = (id: string) => {
-    sounds.playClick();
-    const section = document.getElementById(id);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 z-[80] w-full border-b border-white/10 bg-black/80 backdrop-blur-xl">
-      <div className="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Logo className="size-10" />
-          <h1 className="font-display text-xl font-extrabold tracking-[0.2em] uppercase">
-            Hello <span className="text-primary italic">Healthy</span>
+    <header className={`fixed top-0 z-[150] w-full transition-all duration-500 ${scrolled ? 'h-16 bg-black/90 backdrop-blur-2xl border-b border-primary/20' : 'h-24 bg-transparent border-b border-transparent'}`}>
+      <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center justify-between">
+        <div className="flex items-center gap-4 group" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+          <Logo className={`transition-all duration-500 ${scrolled ? 'size-8' : 'size-12'}`} />
+          <h1 className="font-display text-xl font-black tracking-[0.25em] uppercase hidden sm:block">
+            Hello <span className="text-primary italic transition-colors group-hover:text-white">Healthy</span>
           </h1>
         </div>
         
-        <nav className="hidden lg:flex items-center gap-10">
-          <a onClick={() => { sounds.playClick(); onOpenVideo(); }} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer text-primary">
-            Kinetic Intel
-            <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary"></span>
-          </a>
-          {/* Updated links to scroll to specific sections */}
-          <a onClick={() => scrollToSection('philosophy')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
-            The Stacks
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
-          </a>
-          <a onClick={() => scrollToSection('intelligence-grid')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
-            Optimization
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
-          </a>
-          <a onClick={() => scrollToSection('protocols')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
-            Protocol Intel
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
-          </a>
-          <a onClick={() => scrollToSection('footer')} className="text-[10px] font-bold tracking-[0.3em] hover:text-primary transition-colors uppercase relative group cursor-pointer">
-            Vitality Strands
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
-          </a>
+        <nav className="hidden lg:flex items-center gap-12">
+          {['Kinetic Intel', 'The Stacks', 'Optimization', 'Protocol Feed'].map((item, idx) => (
+            <a 
+              key={item}
+              onClick={(e) => {
+                e.preventDefault();
+                sounds.playClick();
+                if (idx === 0) onOpenVideo();
+              }}
+              className="text-[10px] font-black tracking-[0.4em] hover:text-primary transition-all uppercase relative group cursor-pointer" 
+              href="#"
+            >
+              {item}
+              <span className="absolute -bottom-2 left-1/2 w-0 h-[1px] bg-primary group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+            </a>
+          ))}
         </nav>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-8">
           <button 
             onClick={() => { sounds.playBlip(); onOpenProfile(); }}
-            className="hidden sm:flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] border border-white/10 px-4 py-2 text-slate-400 hover:text-white hover:border-white/30 transition-all"
+            className="hidden md:flex items-center gap-3 text-[9px] font-black tracking-[0.2em] border border-white/10 px-6 py-2.5 text-slate-400 hover:text-white hover:border-primary/50 transition-all bg-white/5"
           >
-            <span className="material-symbols-outlined text-lg">ecg</span>
-            VITAL-DATA
+            <span className="material-symbols-outlined text-lg">biotech</span>
+            BIO-baseline
           </button>
+          
           <button 
             onClick={() => { sounds.playBlip(); onOpenCoach(); }}
-            className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 text-primary hover:bg-primary hover:text-black transition-all shadow-[0_0_15px_rgba(0,255,127,0.1)]"
+            className="flex items-center gap-3 text-[9px] font-black tracking-[0.3em] bg-primary/10 border border-primary/30 px-6 py-2.5 text-primary hover:bg-primary hover:text-black transition-all shadow-[0_0_20px_rgba(0,255,127,0.1)] relative overflow-hidden group"
           >
-            <span className="material-symbols-outlined text-lg">monitor_heart</span>
+            <span className="material-symbols-outlined text-lg animate-pulse">sensors</span>
             PULSE LINK
+            <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
           </button>
+          
           <button 
             onClick={() => sounds.playClick()}
-            className="text-[10px] font-bold tracking-[0.3em] border border-white/20 px-8 py-3 hover:bg-white hover:text-black transition-all"
+            className="text-[9px] font-black tracking-[0.4em] border border-white/20 px-8 py-3 hover:bg-white hover:text-black transition-all hidden sm:block"
           >
             LOGIN
           </button>

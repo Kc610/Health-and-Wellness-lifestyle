@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { sounds } from '../services/ui-sounds';
@@ -57,22 +56,14 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
     const outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
     audioContextRes.current = outputAudioContext;
 
-    // Robust safety for profile access
-    const safeProfile = {
-      age: profile?.age || 'Unknown',
-      weight: profile?.weight || 'Unknown',
-      activityLevel: profile?.activityLevel || 'Moderate',
-      goals: profile?.goals || 'General Optimization'
-    };
-
     const hasProfile = profile?.age && profile?.weight;
-    const bioContext = `
-      SUBJECT BIO-BASELINE:
-      - Chronological Age: ${safeProfile.age}
-      - Physical Mass: ${safeProfile.weight}kg
-      - Activity Protocol: ${safeProfile.activityLevel}
-      - Optimization Targets: ${safeProfile.goals}
-    `;
+    const bioContext = hasProfile ? `
+      SUBJECT BIO-BASELINE DETECTED:
+      - Chronological Age: ${profile.age}
+      - Physical Mass: ${profile.weight}kg
+      - Activity Protocol: ${profile.activityLevel}
+      - Optimization Targets: ${profile.goals}
+    ` : "SUBJECT BIO-BASELINE: DATA GAP DETECTED. No local profile found.";
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -103,8 +94,9 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputAudioContext.destination);
 
+            // Dynamically build the initialization prompt based on user stats
             const initializationPrompt = hasProfile 
-              ? `NEURAL LINK ESTABLISHED. Initiate personalization protocol for subject baseline: ${bioContext}. Start with a targeted greeting that proves you have scanned and understood their specific baseline and targets.`
+              ? `NEURAL LINK ESTABLISHED. Initiate personalization protocol for subject: Age ${profile.age}, Weight ${profile.weight}kg, Activity ${profile.activityLevel}. Targets: ${profile.goals}. Start with a targeted greeting that acknowledges their specific baseline and goals.`
               : "NEURAL LINK ESTABLISHED. Baseline data missing. Greet the user with high-tech authority and request their biological stats to initialize optimization tracking.";
 
             sessionPromise.then(session => {
@@ -174,75 +166,73 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/98 backdrop-blur-2xl animate-fade-in">
-      <div className="absolute top-12 right-12">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in">
+      <div className="absolute top-8 right-8">
         <button 
           onClick={() => { sounds.playClick(); onClose(); }} 
-          className="size-16 flex items-center justify-center border border-white/10 rounded-full text-white/40 hover:text-primary hover:border-primary transition-all group"
+          className="text-white/40 hover:text-primary transition-colors"
         >
-          <span className="material-symbols-outlined text-4xl group-hover:rotate-90 transition-transform">close</span>
+          <span className="material-symbols-outlined text-4xl">close</span>
         </button>
       </div>
 
-      <div className="max-w-3xl w-full px-12 text-center flex flex-col items-center">
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-4 px-6 py-2 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.5em] rounded-full">
-            <span className="size-2 bg-primary rounded-full animate-ping"></span>
-            Sync State: {status}
+      <div className="max-w-2xl w-full px-8 text-center flex flex-col items-center">
+        <div className="mb-4">
+          <div className="inline-block px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.4em]">
+            Neural Link Status: {status}
           </div>
         </div>
 
-        <h2 className="font-display text-6xl font-black mb-20 uppercase tracking-tighter">
-          AEI <span className="text-primary italic">CORE</span> LINK
+        <h2 className="font-display text-4xl font-bold mb-16 uppercase tracking-tighter">
+          AEI <span className="text-primary italic">Coach</span> Syncing
         </h2>
 
-        {/* Dynamic Orbital Visualizer */}
-        <div className="relative size-80 mb-20">
-          <div className={`absolute inset-0 rounded-full border-2 border-primary/10 scale-125 transition-transform duration-500 ${isSpeaking ? 'scale-150 border-primary/30' : ''}`}></div>
-          <div className={`absolute inset-0 rounded-full border border-primary/20 scale-100 animate-ping-slow opacity-30`}></div>
+        {/* Visualizer */}
+        <div className="relative size-64 mb-16">
+          <div className={`absolute inset-0 rounded-full border-2 border-primary/20 scale-110 transition-transform duration-500 ${isSpeaking ? 'scale-125 border-primary/40' : ''}`}></div>
+          <div className={`absolute inset-0 rounded-full border border-primary/40 scale-100 animate-ping opacity-20`}></div>
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className={`size-48 bg-primary text-black rounded-full flex items-center justify-center shadow-[0_0_100px_rgba(0,255,127,0.3)] transition-all duration-300 ${isSpeaking ? 'scale-110' : 'scale-100'}`}>
-                <span className="material-symbols-outlined text-7xl font-bold animate-pulse">graphic_eq</span>
+             <div className={`size-32 bg-primary text-black rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(0,255,127,0.3)] transition-transform duration-300 ${isSpeaking ? 'scale-110' : 'scale-100'}`}>
+                <span className="material-symbols-outlined text-5xl font-bold animate-pulse">graphic_eq</span>
              </div>
           </div>
           
-          {/* Pulsing Data Strands */}
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
+          {/* Orbital Data Points */}
+          {[0, 60, 120, 180, 240, 300].map((deg, i) => (
             <div 
               key={i}
-              className="absolute top-1/2 left-1/2 w-px h-12 bg-primary origin-bottom"
+              className="absolute top-1/2 left-1/2 size-1.5 bg-primary rounded-full"
               style={{
-                transform: `rotate(${deg}deg) translate(0, -140px)`,
-                opacity: isSpeaking ? 0.8 : 0.2,
-                transition: 'opacity 0.3s ease'
+                transform: `rotate(${deg}deg) translate(140px) rotate(-${deg}deg)`,
+                opacity: isSpeaking ? 1 : 0.2
               }}
             ></div>
           ))}
         </div>
 
-        <div className="space-y-6 max-w-lg w-full">
-          <p className="font-mono text-primary text-[11px] font-black tracking-[0.6em] leading-relaxed uppercase animate-pulse">
-            {isSpeaking ? "Broadcasting Intel Helix..." : "Subject Voice Monitoring Active..."}
+        <div className="space-y-4 max-w-md">
+          <p className="font-mono text-primary text-xs tracking-widest leading-relaxed uppercase">
+            {isSpeaking ? "Receiving Data Stream..." : "Listening for Biological Input..."}
           </p>
-          <div className="flex justify-center gap-1.5 h-12 items-end">
-            {Array.from({ length: 24 }).map((_, i) => (
+          <div className="flex justify-center gap-1 h-8 items-end">
+            {Array.from({ length: 12 }).map((_, i) => (
               <div 
                 key={i} 
-                className="w-1.5 bg-primary/60 transition-all duration-75 ease-out"
+                className="w-1.5 bg-primary/40 transition-all duration-100"
                 style={{ 
-                  height: isSpeaking ? `${20 + Math.random() * 80}%` : '6px',
-                  opacity: 0.3 + (Math.random() * 0.7)
+                  height: isSpeaking ? `${20 + Math.random() * 80}%` : '4px',
+                  opacity: 0.2 + (Math.random() * 0.8)
                 }}
               ></div>
             ))}
           </div>
         </div>
 
-        <div className="mt-24 border-t border-white/10 pt-12 w-full">
-          <div className="grid grid-cols-3 gap-12">
-            <DataMetric label="Latency" value="0.08ms" />
-            <DataMetric label="Sync Fidelity" value="99.9%" />
-            <DataMetric label="Neural Tier" value="Master" />
+        <div className="mt-20 border-t border-white/10 pt-8 w-full">
+          <div className="grid grid-cols-3 gap-8">
+            <DataMetric label="Latency" value="12ms" />
+            <DataMetric label="Sync Rate" value="99.9%" />
+            <DataMetric label="Protocol" value="AEI-01" />
           </div>
         </div>
       </div>
@@ -251,9 +241,9 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
 };
 
 const DataMetric = ({ label, value }: { label: string, value: string }) => (
-  <div className="group">
-    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 group-hover:text-primary transition-colors">{label}</p>
-    <p className="text-xl font-mono text-white tracking-tighter font-bold">{value}</p>
+  <div>
+    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">{label}</p>
+    <p className="text-sm font-mono text-white">{value}</p>
   </div>
 );
 

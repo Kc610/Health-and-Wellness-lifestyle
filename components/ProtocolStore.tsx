@@ -1,271 +1,121 @@
 
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Product } from '../types';
-import { generateProductIntel, speakProtocol, NeuralLinkError } from '../services/gemini';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PRODUCTS } from '../services/products';
 import { sounds } from '../services/ui-sounds';
-import { parseProductsFromCsv, rawCsvData } from '../utils/csvParser';
 
 const ProtocolStore: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [intelReport, setIntelReport] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
-
-  useEffect(() => {
-    // Parse products from CSV data on component mount
-    const parsed = parseProductsFromCsv(rawCsvData);
-    setProducts(parsed);
-  }, []);
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return products;
-    return products.filter(product =>
-      product.title.toLowerCase().includes(query) ||
+    if (!query) return PRODUCTS;
+    return PRODUCTS.filter(product => 
+      product.title.toLowerCase().includes(query) || 
       product.category.toLowerCase().includes(query) ||
-      product.description.toLowerCase().includes(query) ||
-      product.tags.some(tag => tag.toLowerCase().includes(query))
+      product.sku.toLowerCase().includes(query)
     );
-  }, [searchQuery, products]);
+  }, [searchQuery]);
 
-  const handleDecompile = async (product: Product) => {
-    sounds.playInject();
-    setSelectedProduct(product);
-    setIsGenerating(true);
-    setIntelReport(null);
-    setError(null);
-    try {
-      // Pass the full HTML description for a richer AI report
-      const report = await generateProductIntel(product.title, product.longDescriptionHtml || product.description);
-      setIntelReport(report);
-    } catch (e) {
-      setError(e instanceof NeuralLinkError ? e.message : "LINK INTERRUPTED");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleSpeak = async () => {
-    if (!intelReport || isSpeaking) return;
-    sounds.playBlip();
-    setIsSpeaking(true);
-    setError(null);
-    try {
-      const playback = await speakProtocol(intelReport);
-      if (playback) {
-        currentAudioSource.current = playback.source;
-        playback.source.start(0);
-        playback.source.onended = () => {
-          setIsSpeaking(false);
-          currentAudioSource.current = null;
-        };
-      }
-    } catch (e) {
-      setError(e instanceof NeuralLinkError ? e.message : "VOICE CORE FAIL");
-      setIsSpeaking(false);
-    }
-  };
-
-  const closeModal = () => {
+  const handleProductClick = (handle: string) => {
     sounds.playClick();
-    if (currentAudioSource.current) {
-      currentAudioSource.current.stop();
-    }
-    setSelectedProduct(null);
-    setIntelReport(null);
-    setError(null);
-    setIsSpeaking(false);
+    navigate(`/protocol/${handle}`);
   };
 
   return (
-    <section id="protocols" className="py-32 bg-black relative">
+    <section id="protocols" className="py-40 bg-background-dark relative">
+      {/* Background Decorative Element */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-20"></div>
+      
       <div className="max-w-[1440px] mx-auto px-8">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
-          <div>
-            <p className="text-primary font-bold tracking-[0.3em] uppercase mb-4 text-xs">Proprietary Strands</p>
-            <h2 className="font-display text-5xl md:text-6xl font-black uppercase tracking-tighter">Inventory <span className="text-primary italic">Helix</span></h2>
+        <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-10">
+          <div className="reveal-on-scroll">
+            <p className="text-primary font-bold tracking-[0.4em] uppercase mb-6 text-xs flex items-center gap-4">
+              <span className="w-6 h-[1px] bg-primary"></span>
+              Proprietary Bio-Strands
+            </p>
+            <h2 className="font-display text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none text-white text-glow">
+              Protocol <span className="text-primary italic">Helix</span>
+            </h2>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row gap-6 w-full md:w-auto">
              <div className="relative group">
-                <input
+                <input 
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="QUERY HELIX..."
-                  className="bg-surface-dark border border-white/10 px-6 py-4 pl-12 text-[10px] font-mono tracking-widest uppercase focus:border-primary outline-none transition-all w-full sm:min-w-[300px] text-white"
+                  placeholder="SEARCH VITALITY SECTOR..."
+                  className="bg-surface-dark border border-white/10 px-8 py-6 pl-16 text-[11px] font-mono tracking-[0.3em] uppercase focus:border-primary outline-none transition-all w-full sm:min-w-[420px] text-white focus:shadow-[0_0_30px_rgba(0,255,127,0.15)] placeholder:text-zinc-700"
                 />
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg group-focus-within:text-primary transition-colors">search</span>
+                <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600 text-2xl group-focus-within:text-primary transition-colors">dna</span>
                 {searchQuery && (
-                  <button
+                  <button 
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
                   >
-                    <span className="material-symbols-outlined text-lg">close</span>
+                    <span className="material-symbols-outlined text-xl">close</span>
                   </button>
                 )}
-             </div>
-             <div className="flex items-center gap-2 px-6 py-4 border border-white/10 bg-white/5 h-[54px]">
-                <span className="size-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vitality Sync Active</span>
              </div>
           </div>
         </div>
 
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 animate-fade-in">
-            {filteredProducts.map((product) => (
-              <div key={product.handle} className="group relative bg-surface-dark border border-white/5 hover:border-primary/40 transition-all duration-500 hover:-translate-y-2 shadow-2xl">
-                <div className="aspect-[4/5] overflow-hidden bg-black/40 relative">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+            {filteredProducts.map((product, idx) => (
+              <div 
+                key={product.handle} 
+                onClick={() => handleProductClick(product.handle)}
+                className="group cursor-pointer relative bg-surface-dark border border-white/5 hover:border-primary/40 transition-all duration-700 hover:-translate-y-4 shadow-3xl overflow-hidden"
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
+                <div className="aspect-[4/5] overflow-hidden bg-black relative">
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    loading="lazy"
+                    className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[1.5s] grayscale group-hover:grayscale-0" 
                   />
-                  <div className="absolute top-4 left-4">
-                    <p className="text-[9px] font-black uppercase tracking-wider bg-black/80 px-2 py-1 border border-white/10 text-slate-400">
+                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80 group-hover:opacity-30 transition-opacity"></div>
+                  
+                  <div className="absolute top-6 left-6 flex gap-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest bg-background-dark/90 px-4 py-2 border border-white/10 text-primary backdrop-blur-lg">
                       {product.sku}
                     </p>
                   </div>
-                </div>
-                <div className="p-8">
-                  <p className="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">{product.category}</p>
-                  <h3 className="font-display text-2xl font-bold uppercase tracking-tight mb-6 group-hover:text-primary transition-colors">{product.title}</h3>
 
-                  <div className="flex items-center justify-between">
-                    <p className="font-mono text-xl font-bold text-white">${product.price.toFixed(2)}</p>
-                    <button
-                      onClick={() => handleDecompile(product)}
-                      className="text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 px-4 py-2 hover:bg-primary hover:text-black hover:border-primary transition-all"
-                    >
-                      Intel Report
-                    </button>
+                  <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/20 transition-all duration-500 pointer-events-none"></div>
+                </div>
+
+                <div className="p-10 relative bg-surface-dark/95 backdrop-blur-md">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="size-1.5 rounded-full bg-primary animate-pulse"></span>
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] group-hover:text-zinc-300 transition-colors">{product.category}</p>
+                  </div>
+                  <h3 className="font-display text-3xl font-bold uppercase tracking-tight mb-10 group-hover:text-primary transition-colors min-h-[72px] leading-none text-white">
+                    {product.title}
+                  </h3>
+                  
+                  <div className="flex items-center justify-between border-t border-white/5 pt-8">
+                    <p className="font-mono text-3xl font-black text-white">${product.price}</p>
+                    <div className="group/btn relative px-8 py-4 overflow-hidden border border-primary/30">
+                      <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] group-hover/btn:text-black transition-colors text-white">Open Matrix</span>
+                      <div className="absolute inset-0 bg-primary translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="py-32 text-center border border-dashed border-white/10 bg-white/5 animate-pulse">
-            <span className="material-symbols-outlined text-6xl text-slate-700 mb-6">healing</span>
-            <p className="font-mono text-xs uppercase tracking-[0.4em] text-slate-500">No matching vitality strands found in current pulse sector.</p>
+          <div className="py-48 text-center border border-dashed border-white/10 bg-white/[0.02] animate-pulse rounded-2xl">
+            <span className="material-symbols-outlined text-8xl text-zinc-800 mb-10">satellite_alt</span>
+            <h4 className="font-display text-3xl font-bold uppercase text-white mb-4">Sector Unresponsive</h4>
+            <p className="font-mono text-xs uppercase tracking-[0.5em] text-zinc-600">Search query returned zero vitality hits in the protocol helix.</p>
           </div>
         )}
       </div>
-
-      {/* Intel Modal */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8">
-          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={closeModal}></div>
-          <div className="relative w-full max-w-4xl bg-surface-dark border border-primary/30 p-8 md:p-16 shadow-[0_0_150px_rgba(0,255,127,0.15)] overflow-y-auto max-h-[95vh]">
-            <div className="absolute top-4 right-4">
-               <button onClick={closeModal} className="text-white/40 hover:text-white transition-colors size-12 flex items-center justify-center">
-                 <span className="material-symbols-outlined text-4xl">close</span>
-               </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-              <div className="lg:col-span-4">
-                <div className="aspect-square bg-black border border-white/10 mb-8 overflow-hidden">
-                  <img src={selectedProduct.image} alt={selectedProduct.title} className="w-full h-full object-cover" />
-                </div>
-                {/* Add Rating and Reviews */}
-                {selectedProduct.rating > 0 && (
-                  <div className="flex items-center gap-2 mb-4">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i} className={`material-symbols-outlined text-lg ${i < Math.floor(selectedProduct.rating) ? 'text-yellow-400' : 'text-slate-700'}`}>star</span>
-                      ))}
-                      <span className="font-mono text-sm text-slate-400">{selectedProduct.rating.toFixed(1)} ({selectedProduct.reviews} reviews)</span>
-                  </div>
-                )}
-                {/* Display Tags */}
-                {selectedProduct.tags && selectedProduct.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-8">
-                        {selectedProduct.tags.map((tag, i) => (
-                            <span key={i} className="text-[8px] font-black uppercase tracking-wider bg-white/5 px-2 py-1 border border-white/10 text-slate-400">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                )}
-                <div className="space-y-4">
-                  <button
-                    onClick={() => sounds.playClick()}
-                    className="w-full bg-primary text-black py-5 font-black text-xs uppercase tracking-widest hover:bg-white transition-all transform active:scale-95 shadow-xl"
-                  >
-                    Authorize Helix Sync
-                  </button>
-                  <button
-                    onClick={handleSpeak}
-                    disabled={!intelReport || isSpeaking}
-                    className={`w-full border py-4 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-30 group ${error ? 'bg-safety-orange/10 border-safety-orange/30 text-safety-orange hover:bg-safety-orange hover:text-black' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
-                  >
-                    <span className={`material-symbols-outlined text-lg ${isSpeaking ? 'animate-pulse text-primary' : ''}`}>
-                      {isSpeaking ? 'audio_file' : error ? 'error' : 'hearing'}
-                    </span>
-                    {isSpeaking ? 'SYNTESIZING...' : error ? 'RETRY SYNTH' : 'SYNTHESIZE VOICE INTEL'}
-                  </button>
-                </div>
-              </div>
-
-              <div className="lg:col-span-8">
-                <div className="mb-10">
-                  <h3 className="font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-primary mb-2">{selectedProduct.title}</h3>
-                  <div className="flex items-center gap-4 text-slate-500">
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Helix ID: {selectedProduct.sku}</span>
-                    <span className="size-1 bg-slate-700 rounded-full"></span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Biological Auth Required</span>
-                  </div>
-                </div>
-
-                <div className="space-y-12">
-                  <div>
-                    <h4 className={`font-mono text-[10px] uppercase tracking-[0.4em] mb-6 flex items-center gap-3 transition-colors ${error ? 'text-safety-orange' : 'text-primary/60'}`}>
-                      <span className={`h-px w-8 ${error ? 'bg-safety-orange/40' : 'bg-primary/20'}`}></span> {error ? 'Pulse Link Error' : 'Biological Intel Report'}
-                    </h4>
-                    <div className="font-mono text-sm leading-relaxed text-slate-300 min-h-[300px]">
-                      {isGenerating ? (
-                        <div className="flex flex-col gap-6">
-                          <div className="h-4 bg-white/5 w-3/4 animate-pulse"></div>
-                          <div className="h-4 bg-white/5 w-full animate-pulse [animation-delay:0.1s]"></div>
-                          <div className="h-4 bg-white/5 w-1/2 animate-pulse [animation-delay:0.2s]"></div>
-                        </div>
-                      ) : error ? (
-                        <div className="p-8 border border-safety-orange/20 bg-safety-orange/5 text-safety-orange animate-glitch-subtle">
-                           <p className="mb-6 font-bold uppercase tracking-widest">{error}</p>
-                           <button
-                             onClick={() => handleDecompile(selectedProduct)}
-                             className="text-[10px] font-black border border-safety-orange px-6 py-2 hover:bg-safety-orange hover:text-black transition-all"
-                           >
-                             Re-run Decryption
-                           </button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className={`whitespace-pre-wrap animate-fade-in border-l-2 pl-8 transition-all duration-1000 ${isSpeaking ? 'border-primary shadow-[inset_10px_0_20px_-10px_rgba(0,255,127,0.1)]' : 'border-primary/20'}`}>
-                            {intelReport}
-                          </div>
-                          {selectedProduct.longDescriptionHtml && (
-                              <div className="mt-8 border-t border-white/10 pt-8">
-                                  <h4 className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/60 mb-4 flex items-center gap-3">
-                                      <span className="h-px w-8 bg-primary/20"></span> Raw Biological Protocol
-                                  </h4>
-                                  <div dangerouslySetInnerHTML={{ __html: selectedProduct.longDescriptionHtml }} className="prose-invert max-w-none text-slate-300"></div>
-                              </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 };

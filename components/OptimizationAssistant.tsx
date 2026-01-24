@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { createOptimizationChat } from '../services/gemini';
 import { ChatMessage } from '../types';
@@ -141,6 +140,15 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
         </form>
       </div>
       
+      <style>{`
+        @keyframes slide-left {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        .animate-slide-left {
+          animation: slide-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+      `}</style>
     </div>
   );
 };

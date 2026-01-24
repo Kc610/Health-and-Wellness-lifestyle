@@ -19,17 +19,15 @@ export interface ChatMessage {
 export interface Product {
   handle: string;
   title: string;
-  price: number;
+  price: string;
   sku: string;
-  image: string; // Primary image for product card
-  images: string[]; // All images for the product
+  image: string;
   category: string;
-  description: string; // Short plain text description
-  longDescriptionHtml: string; // Full HTML description from CSV
-  tags: string[]; // Extracted from HTML badges
-  rating: number; // Randomly generated
-  reviews: number; // Randomly generated
-  vendor: string;
+  description: string;
+  bodyHtml?: string;
+  vendor?: string;
+  tags?: string[];
+  gallery?: string[];
 }
 
 export interface UserProfile {
@@ -38,4 +36,8 @@ export interface UserProfile {
   height: string;
   activityLevel: 'low' | 'moderate' | 'high' | 'elite';
   goals: string;
+}
+
+export interface CartItem extends Product {
+  quantity: number;
 }
