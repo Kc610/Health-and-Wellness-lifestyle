@@ -25,27 +25,27 @@ const BioFeedbackLoop: React.FC = () => {
   }, []);
 
   return (
-    <section className="py-32 bg-black border-b border-white/5 relative overflow-hidden">
+    <section className="py-40 bg-background-dark border-b border-white/5 relative overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
           <div className="lg:col-span-4">
-            <h3 className="font-display text-4xl font-bold mb-6 uppercase tracking-tighter">Bio-Feedback <br/><span className="text-primary italic">Loop</span></h3>
-            <p className="text-slate-500 text-sm font-light leading-relaxed mb-12 uppercase tracking-widest">
+            <h3 className="font-display text-5xl font-black mb-10 uppercase tracking-tighter text-white">Bio-Feedback <br/><span className="text-primary italic">Loop</span></h3>
+            <p className="text-neutral-500 text-sm font-light leading-relaxed mb-16 uppercase tracking-[0.3em]">
               Direct telemetry from the Hello Healthy Vitality Helix. Monitor your biological trajectory in high-fidelity.
             </p>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               {metrics.map((m, i) => (
                 <button 
                   key={m.label}
                   onClick={() => { sounds.playClick(); setActiveMetric(i); }}
-                  className={`w-full p-6 border transition-all text-left flex justify-between items-center group ${activeMetric === i ? 'bg-primary border-primary text-black' : 'border-white/10 bg-white/5 text-slate-400 hover:border-primary/50'}`}
+                  className={`w-full p-8 border transition-all duration-300 text-left flex justify-between items-center group shadow-xl ${activeMetric === i ? 'bg-primary border-primary text-black' : 'border-white/10 bg-neutral-900/30 text-neutral-400 hover:border-primary/50'}`}
                 >
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-60">{m.label}</p>
-                    <p className="text-xl font-display font-bold uppercase">{m.target} <span className="text-xs font-mono">{m.unit}</span></p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-2 opacity-60">{m.label}</p>
+                    <p className="text-2xl font-display font-bold uppercase">{m.target} <span className="text-[10px] font-mono tracking-normal">{m.unit}</span></p>
                   </div>
-                  <span className={`material-symbols-outlined transition-transform ${activeMetric === i ? 'rotate-90' : 'group-hover:translate-x-1'}`}>
+                  <span className={`material-symbols-outlined text-3xl transition-transform ${activeMetric === i ? 'rotate-90' : 'group-hover:translate-x-2'}`}>
                     pulse
                   </span>
                 </button>
@@ -53,38 +53,38 @@ const BioFeedbackLoop: React.FC = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-8 bg-surface-dark border border-white/10 p-1 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYm8bpVMp3zgh88IMXrNDT78VKt-lQW01NBjX1WYsX3jVxzqHbxAlE4F9TRQxZ0vmq2NJxA16JrV9pHRqEycVlhvKYjmX4vq-KVXbrh9BosPqeXaKZ7z33vVQxX4TvJIdf1K4GlubGFYrPDRZ_ahItV7l3oTbULxr-VUO_MlXEMwJ0bbLNVpWzo_dduyZfR-RKtyS2GRatvb2ZwTWgtOJVzqZTlTpzGo_JG0vyS3v6DxK_D_XTEaaNFlQqEU_hINIfQ-J4LJdzHr4')] bg-repeat opacity-90">
-             <div className="bg-black/80 p-8 md:p-12 relative overflow-hidden">
-                <div className="flex justify-between items-start mb-8">
+          <div className="lg:col-span-8 bg-neutral-900/20 border border-white/10 p-2 shadow-[0_0_100px_rgba(0,0,0,1)]">
+             <div className="bg-background-dark/80 p-10 md:p-16 relative overflow-hidden border border-white/5">
+                <div className="flex justify-between items-start mb-12">
                   <div>
-                    <p className="text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-2">Live Telemetry Feed // Cluster A-1</p>
-                    <p className="text-white/40 text-[9px] font-mono uppercase tracking-widest italic">Encrypted Vitality Stream Active</p>
+                    <p className="text-primary text-[10px] font-black uppercase tracking-[0.6em] mb-2">Live Telemetry Feed // Cluster A-1</p>
+                    <p className="text-neutral-600 text-[10px] font-mono uppercase tracking-[0.4em] italic">Encrypted Vitality Stream Active</p>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="size-2 rounded-full bg-primary animate-ping"></div>
-                    <div className="size-2 rounded-full bg-primary/40"></div>
+                  <div className="flex gap-4">
+                    <div className="size-2.5 rounded-full bg-primary animate-ping"></div>
+                    <div className="size-2.5 rounded-full bg-primary/20"></div>
                   </div>
                 </div>
 
-                <div className="h-[300px] flex items-end gap-[2px]">
+                <div className="h-[350px] flex items-end gap-[3px]">
                   {dataPoints.map((p, i) => (
                     <div 
                       key={i}
-                      className="flex-1 bg-primary/20 hover:bg-primary transition-colors duration-300 relative group"
+                      className="flex-1 bg-primary/20 hover:bg-primary transition-all duration-500 relative group"
                       style={{ height: `${p}%` }}
                     >
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-mono text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[9px] font-mono text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                         {Math.floor(p)}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/10">
+                <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-12 pt-12 border-t border-white/10">
                    {['Synapse', 'Resilience', 'Output', 'Stability'].map(tag => (
                      <div key={tag}>
-                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">{tag} Index</p>
-                        <p className="text-lg font-display font-bold text-white tracking-tighter">{(Math.random() * 10).toFixed(1)} <span className="text-[10px] opacity-40">SR</span></p>
+                        <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.4em] mb-3">{tag} Index</p>
+                        <p className="text-2xl font-display font-bold text-white tracking-tighter">{(Math.random() * 10).toFixed(1)} <span className="text-[10px] opacity-40">SR</span></p>
                      </div>
                    ))}
                 </div>

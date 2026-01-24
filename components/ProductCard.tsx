@@ -79,7 +79,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       <div className="p-8 relative z-10 bg-surface-dark">
         <div className="flex items-center gap-2 mb-3">
           <span className="size-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true"></span>
-          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] group-hover:text-white transition-colors">{product.category}</p>
+          <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-[0.2em] group-hover:text-white transition-colors">{product.category}</p>
         </div>
         <h3 className="font-display text-2xl font-bold uppercase tracking-tight mb-8 text-white group-hover:text-primary transition-colors min-h-[64px] leading-tight">
           {product.title}
@@ -88,7 +88,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         <div className="flex items-center justify-between border-t border-white/10 pt-6">
           <p className="font-mono text-2xl font-black text-white">${product.price}</p>
           <div className="group/btn relative px-6 py-3 overflow-hidden border border-white/20 group-hover:border-primary/50 transition-colors">
-            <span className="relative z-10 text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 group-hover/btn:text-black transition-colors">Open Matrix</span>
+            <span className="relative z-10 text-[9px] font-black uppercase tracking-[0.2em] text-neutral-300 group-hover/btn:text-black transition-colors">Open Matrix</span>
             <div className="absolute inset-0 bg-primary translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
           </div>
         </div>

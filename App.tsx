@@ -48,8 +48,8 @@ const MainLayout: React.FC<{
             <div className="absolute top-0 left-0 w-1 h-full bg-primary transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top"></div>
             
             <div className="max-w-xl relative z-10">
-              <h4 className="font-display text-4xl font-black mb-6 uppercase tracking-tighter">Initialize Your Helix</h4>
-              <p className="text-slate-400 mb-8 font-light text-lg">The world's most advanced biological optimization toolkit. Engineered for those who refuse to settle for the standard human baseline.</p>
+              <h4 className="font-display text-4xl font-black mb-6 uppercase tracking-tighter text-white">Initialize Your Helix</h4>
+              <p className="text-neutral-400 mb-8 font-light text-lg">The world's most advanced biological optimization toolkit. Engineered for those who refuse to settle for the standard human baseline.</p>
               <div className="flex flex-wrap gap-4">
                 <button 
                   onClick={() => sounds.playClick()}
@@ -59,7 +59,7 @@ const MainLayout: React.FC<{
                 </button>
                 <button 
                   onClick={() => sounds.playClick()}
-                  className="border border-white/20 px-8 py-4 font-black text-xs tracking-widest uppercase hover:bg-white/5 transition-colors"
+                  className="border border-white/20 px-8 py-4 font-black text-xs tracking-widest uppercase hover:bg-white/5 transition-colors text-white"
                 >
                   Browse Vitality Feed
                 </button>
@@ -75,7 +75,7 @@ const MainLayout: React.FC<{
               ].map((stat, i) => (
                 <div key={i} className="p-8 bg-black/40 border border-white/5 text-center group hover:border-primary/50 transition-all hover:-translate-y-1">
                   <p className="text-4xl font-display font-bold text-primary mb-1">{stat.value}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -146,7 +146,7 @@ const App: React.FC = () => {
               <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white">
                 Initialize <span className="text-primary italic">Pulse Sync</span>
               </h2>
-              <p className="font-mono text-[10px] text-slate-500 uppercase tracking-[0.4em]">
+              <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-[0.4em]">
                 Stabilizing vitality markers... link state optimal.
               </p>
               <button 
@@ -194,7 +194,7 @@ const App: React.FC = () => {
           <div className="relative size-16 bg-primary text-black rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-95 group-hover:rotate-12">
             <span className="material-symbols-outlined text-3xl font-bold">query_stats</span>
           </div>
-          <div className="absolute -top-12 right-0 bg-surface-dark border border-primary/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all pointer-events-none">
+          <div className="absolute -top-12 right-0 bg-neutral-900 border border-primary/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all pointer-events-none text-white">
             Synchronize Agent
           </div>
         </button>

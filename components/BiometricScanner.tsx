@@ -33,7 +33,6 @@ const BiometricScanner: React.FC = () => {
         context.drawImage(videoRef.current, 0, 0, 400, 300);
         const base64 = canvasRef.current.toDataURL('image/jpeg').split(',')[1];
         
-        // Visual effect
         setIsScanning(true);
         const result = await analyzeBiometrics(base64);
         setAnalysis(result);
@@ -51,17 +50,17 @@ const BiometricScanner: React.FC = () => {
   }, [hasPermission]);
 
   return (
-    <section className="py-24 bg-black border-y border-white/10 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <section className="py-32 bg-background-dark border-y border-white/5 relative overflow-hidden">
+      <div className="max-w-[1440px] mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
         <div>
-          <p className="text-primary font-bold tracking-[0.3em] uppercase mb-6 text-sm flex items-center gap-4">
-            <span className="w-8 h-px bg-primary"></span>
+          <p className="text-primary font-bold tracking-[0.5em] uppercase mb-8 text-xs flex items-center gap-6">
+            <span className="w-12 h-px bg-primary"></span>
             Biometric Audit
           </p>
-          <h3 className="font-display text-5xl font-bold mb-8 uppercase tracking-tighter">
-            Audit Your <br/><span className="text-primary">Genetic Hardware.</span>
+          <h3 className="font-display text-5xl md:text-7xl font-black mb-10 uppercase tracking-tighter leading-tight text-white">
+            Audit Your <br/><span className="text-primary italic">Genetic Hardware.</span>
           </h3>
-          <p className="text-slate-400 text-lg font-light leading-relaxed mb-10 max-w-md">
+          <p className="text-neutral-400 text-lg font-light leading-relaxed mb-12 max-w-lg">
             Connect your neural node to our vision core for a real-time biological optimization audit. 
             Identify bottlenecks in your metabolic and neural circuitry.
           </p>
@@ -69,34 +68,34 @@ const BiometricScanner: React.FC = () => {
           {!hasPermission && (
             <button 
               onClick={() => { sounds.playClick(); setHasPermission(true); }}
-              className="bg-primary text-black px-10 py-5 font-black text-xs tracking-widest uppercase hover:bg-white transition-all flex items-center gap-3"
+              className="bg-primary text-black px-12 py-6 font-black text-xs tracking-[0.5em] uppercase hover:bg-white transition-all flex items-center gap-4 shadow-xl"
             >
-              <span className="material-symbols-outlined">videocam</span>
+              <span className="material-symbols-outlined text-xl">videocam</span>
               Initialize Optical Sync
             </button>
           )}
 
           {analysis && (
-            <div className="p-8 border border-primary/30 bg-primary/5 font-mono animate-fade-in">
-              <div className="grid grid-cols-2 gap-8 mb-8">
+            <div className="p-10 border border-primary/30 bg-primary/5 font-mono animate-fade-in shadow-2xl backdrop-blur-3xl">
+              <div className="grid grid-cols-2 gap-10 mb-10">
                 <div>
-                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Genetic Tier</p>
-                  <p className="text-xl font-bold uppercase">{analysis.geneticTier}</p>
+                  <p className="text-[10px] text-primary/60 uppercase tracking-widest mb-2">Genetic Tier</p>
+                  <p className="text-xl font-bold uppercase text-white">{analysis.geneticTier}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Neural Latency</p>
-                  <p className="text-xl font-bold uppercase">{analysis.neuralLatency}</p>
+                  <p className="text-[10px] text-primary/60 uppercase tracking-widest mb-2">Neural Latency</p>
+                  <p className="text-xl font-bold uppercase text-white">{analysis.neuralLatency}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Metabolic Efficiency</p>
-                  <p className="text-xl font-bold uppercase">{analysis.metabolicEfficiency}</p>
+                  <p className="text-[10px] text-primary/60 uppercase tracking-widest mb-2">Metabolic Flux</p>
+                  <p className="text-xl font-bold uppercase text-white">{analysis.metabolicEfficiency}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-primary/50 uppercase tracking-widest mb-1">Status</p>
-                  <p className="text-xl font-bold uppercase text-primary">AUDITED</p>
+                  <p className="text-[10px] text-primary/60 uppercase tracking-widest mb-2">Status</p>
+                  <p className="text-xl font-bold uppercase text-primary text-glow">AUDITED</p>
                 </div>
               </div>
-              <p className="text-xs leading-relaxed italic text-slate-300 border-t border-primary/20 pt-4">
+              <p className="text-sm leading-relaxed italic text-neutral-300 border-t border-primary/20 pt-6">
                 "{analysis.protocolRecommendation}"
               </p>
             </div>
@@ -104,10 +103,10 @@ const BiometricScanner: React.FC = () => {
         </div>
 
         <div className="relative group">
-          <div className="aspect-square max-w-md mx-auto relative rounded-full overflow-hidden border-4 border-white/10 group-hover:border-primary/50 transition-colors">
+          <div className="aspect-square max-w-lg mx-auto relative rounded-full overflow-hidden border-8 border-white/5 group-hover:border-primary/40 transition-all duration-700 shadow-[0_0_100px_rgba(0,0,0,1)]">
             {!hasPermission ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-surface-dark text-slate-700">
-                <span className="material-symbols-outlined text-8xl">sensors_off</span>
+              <div className="absolute inset-0 flex items-center justify-center bg-neutral-900 text-neutral-800">
+                <span className="material-symbols-outlined text-9xl">sensors_off</span>
               </div>
             ) : (
               <video 
@@ -115,24 +114,24 @@ const BiometricScanner: React.FC = () => {
                 autoPlay 
                 muted 
                 playsInline 
-                className={`w-full h-full object-cover scale-x-[-1] ${isScanning ? 'blur-md' : ''}`}
+                className={`w-full h-full object-cover scale-x-[-1] grayscale contrast-125 ${isScanning ? 'blur-xl' : ''}`}
               />
             )}
             
             {/* HUD Overlays */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-primary/40 animate-scan"></div>
-              <div className="absolute inset-0 border-[40px] border-black/20"></div>
-              <div className="absolute top-10 left-1/2 -translate-x-1/2 flex gap-4">
-                <div className="size-2 rounded-full bg-red-500 animate-pulse"></div>
-                <div className="text-[8px] font-black text-white/50 uppercase tracking-widest">Rec Link Active</div>
+            <div className="absolute inset-0 pointer-events-none z-10">
+              <div className="absolute top-1/2 left-0 w-full h-[1.5px] bg-primary animate-scan shadow-[0_0_15px_#00FF7F]"></div>
+              <div className="absolute inset-0 border-[60px] border-background-dark/30"></div>
+              <div className="absolute top-12 left-1/2 -translate-x-1/2 flex gap-4 bg-black/40 px-6 py-2 rounded-full border border-white/5 backdrop-blur-md">
+                <div className="size-2 rounded-full bg-red-600 animate-pulse"></div>
+                <div className="text-[9px] font-black text-white/70 uppercase tracking-[0.4em]">Rec Link Active</div>
               </div>
             </div>
 
             {isScanning && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
-                <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-primary font-mono text-[10px] font-bold uppercase tracking-[0.5em]">Decompiling Biometrics...</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-2xl z-20">
+                <div className="size-20 border-4 border-primary border-t-transparent rounded-full animate-spin mb-8"></div>
+                <p className="text-primary font-mono text-xs font-black uppercase tracking-[0.6em] animate-pulse">Decompiling Biometrics...</p>
               </div>
             )}
           </div>
@@ -143,7 +142,7 @@ const BiometricScanner: React.FC = () => {
             <button 
               onClick={handleScan}
               disabled={isCapturing}
-              className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white text-black size-20 rounded-full font-black text-[10px] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all group-hover:bg-primary"
+              className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white text-black size-24 rounded-full font-black text-xs flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:scale-110 active:scale-90 transition-all duration-300 group-hover:bg-primary uppercase tracking-widest z-30"
             >
               SCAN
             </button>
@@ -156,13 +155,13 @@ const BiometricScanner: React.FC = () => {
           100% { top: 100%; }
         }
         .animate-scan {
-          animation: scan 3s linear infinite;
+          animation: scan 4s linear infinite;
         }
         .animate-fade-in {
-          animation: fadeIn 1s ease-out forwards;
+          animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>

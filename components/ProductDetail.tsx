@@ -86,7 +86,7 @@ const ProductDetail: React.FC = () => {
         <button 
           onClick={() => navigate('/')}
           aria-label="Navigate back to the protocol catalog"
-          className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 hover:text-primary transition-colors mb-16"
+          className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500 hover:text-primary transition-colors mb-16"
         >
           <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform" aria-hidden="true">arrow_back</span>
           Back to Protocols
@@ -123,7 +123,7 @@ const ProductDetail: React.FC = () => {
                 { label: 'Latency', value: '0.1MS' }
               ].map(stat => (
                 <div key={stat.label} className="p-6 bg-surface-dark border border-white/5 text-center">
-                  <p className="text-[8px] text-slate-600 font-black uppercase mb-1 tracking-widest">{stat.label}</p>
+                  <p className="text-[8px] text-neutral-600 font-black uppercase mb-1 tracking-widest">{stat.label}</p>
                   <p className="text-sm font-mono text-white uppercase">{stat.value}</p>
                 </div>
               ))}
@@ -142,7 +142,7 @@ const ProductDetail: React.FC = () => {
               </h1>
               <p className="font-mono text-4xl font-black text-white mb-8" aria-label={`Price: ${product.price} dollars`}>${product.price}</p>
               
-              <div className="prose prose-invert prose-sm max-w-none text-slate-400 font-light leading-relaxed mb-12">
+              <div className="prose prose-invert prose-sm max-w-none text-neutral-400 font-light leading-relaxed mb-12">
                 <div dangerouslySetInnerHTML={{ __html: product.bodyHtml || product.description }}></div>
               </div>
             </div>
@@ -180,7 +180,7 @@ const ProductDetail: React.FC = () => {
                      <button 
                        onClick={handleSpeak}
                        aria-label={isSpeaking ? "Voice synchronization in progress" : "Read intelligence briefing aloud"}
-                       className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${isSpeaking ? 'text-primary' : 'text-slate-500 hover:text-white'}`}
+                       className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${isSpeaking ? 'text-primary' : 'text-neutral-500 hover:text-white'}`}
                      >
                        <span className={`material-symbols-outlined text-lg ${isSpeaking ? 'animate-pulse' : ''}`} aria-hidden="true">
                         {isSpeaking ? 'graphic_eq' : 'volume_up'}
@@ -190,7 +190,7 @@ const ProductDetail: React.FC = () => {
                    )}
                 </div>
 
-                <div className="font-mono text-sm text-slate-300 leading-relaxed min-h-[200px]">
+                <div className="font-mono text-sm text-neutral-300 leading-relaxed min-h-[200px]">
                   {isGenerating ? (
                     <div className="space-y-6" aria-busy="true">
                       <div className="h-2 bg-white/5 w-full animate-shimmer"></div>

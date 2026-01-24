@@ -80,17 +80,17 @@ const VideoAnalyzer: React.FC<Props> = ({ onClose }) => {
         <div className="flex justify-between items-center mb-10">
           <div>
             <h2 className="font-display text-3xl font-black uppercase tracking-tighter text-white">Visual <span className="text-primary italic">Intelligence</span> Core</h2>
-            <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] mt-1">Extracting kinetic markers from raw telemetry</p>
+            <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.3em] mt-1">Extracting kinetic markers from raw telemetry</p>
           </div>
-          <button onClick={() => { sounds.playClick(); onClose(); }} className="text-slate-500 hover:text-white transition-colors">
+          <button onClick={() => { sounds.playClick(); onClose(); }} className="text-neutral-500 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-3xl">close</span>
           </button>
         </div>
 
         {!report && !isProcessing && !error && (
           <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-white/10 bg-white/5 hover:border-primary/40 transition-colors group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-            <span className="material-symbols-outlined text-6xl text-slate-600 mb-6 group-hover:text-primary transition-colors group-hover:scale-110">video_library</span>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 group-hover:text-white transition-colors">Inject Kinetic Telemetry (MP4/MOV)</p>
+            <span className="material-symbols-outlined text-6xl text-neutral-600 mb-6 group-hover:text-primary transition-colors group-hover:scale-110">video_library</span>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-neutral-400 group-hover:text-white transition-colors">Inject Kinetic Telemetry (MP4/MOV)</p>
             <input 
               ref={fileInputRef}
               type="file" 
@@ -140,14 +140,14 @@ const VideoAnalyzer: React.FC<Props> = ({ onClose }) => {
               <h4 className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/60 mb-6 flex items-center gap-3">
                 <span className="h-px w-8 bg-primary/20"></span> Generated Intel Briefing
               </h4>
-              <div className="font-mono text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+              <div className="font-mono text-sm leading-relaxed text-neutral-300 whitespace-pre-wrap">
                 {report}
               </div>
             </div>
             <div className="mt-8 flex justify-end gap-4">
               <button 
                 onClick={() => setReport(null)}
-                className="text-[10px] font-black uppercase tracking-widest px-6 py-3 border border-white/10 hover:bg-white/5 transition-all"
+                className="text-[10px] font-black uppercase tracking-widest px-6 py-3 border border-white/10 hover:bg-white/5 transition-all text-white"
               >
                 Clear Cache
               </button>
