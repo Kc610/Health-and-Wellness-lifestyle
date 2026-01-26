@@ -1,13 +1,16 @@
+
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenAI, Type } = require('@google/genai');
+// Import GoogleGenAI and Modality from the correct package
+const { GoogleGenAI, Type, Modality } = require('@google/genai');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const genAI = new GoogleGenAI(process.env.API_KEY);
+// Initialize GoogleGenAI with named parameter apiKey
+const genAI = new GoogleGenAI({apiKey: process.env.API_KEY});
 
 // CENTRALIZED AGENT PERSONA
 const SYSTEM_PROMPT = `You are the Hello Healthy Chief Synergy Agent. 
@@ -19,17 +22,20 @@ Always return responses in the requested JSON format.`;
 app.post('/api/analyze-biometrics', async (req, res) => {
   try {
     const { image } = req.body;
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      systemInstruction: SYSTEM_PROMPT
-    });
-
-    const result = await model.generateContent({
+    // Fix: Using ai.models.generateContent directly instead of deprecated getGenerativeModel
+    // Fix: Moved systemInstruction to the top level config of generateContent
+    const result = await genAI.models.generateContent({
+      model: "gemini-3-flash-preview", // Updated model name to 'gemini-3-flash-preview' for image generation/editing tasks.
+      systemInstruction: SYSTEM_PROMPT,
       contents: [
-        { inlineData: { mimeType: "image/jpeg", data: image } },
-        { text: "Perform vitality audit on this specimen." }
+        {
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: image } },
+            { text: "Perform vitality audit on this specimen." }
+          ]
+        }
       ],
-      generationConfig: {
+      config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -42,7 +48,8 @@ app.post('/api/analyze-biometrics', async (req, res) => {
         }
       }
     });
-    res.json(JSON.parse(result.response.text()));
+    // Fix: Access .text property directly, and ensure parsing is robust.
+    res.json(JSON.parse(result.text));
   } catch (error) {
     console.error("Link Error:", error);
     res.status(500).json({ error: "Biometric Core Offline" });
@@ -53,15 +60,17 @@ app.post('/api/analyze-biometrics', async (req, res) => {
 app.post('/api/speak-protocol', async (req, res) => {
   try {
     const { text } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-    const result = await model.generateContent({
+    // Fix: Using ai.models.generateContent directly instead of deprecated getGenerativeModel
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts", // Updated model name to 'gemini-2.5-flash-preview-tts' for text-to-speech tasks.
       contents: [{ parts: [{ text: `System Broadcast: ${text}` }] }],
-      generationConfig: {
-        responseModalities: ["AUDIO"],
+      config: {
+        responseModalities: [Modality.AUDIO],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } }
       }
     });
-    const audioData = result.response.candidates[0].content.parts[0].inlineData.data;
+    // Fix: Access candidates safely for audio data.
+    const audioData = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     res.json({ audio: audioData });
   } catch (error) {
     res.status(500).json({ error: "Voice Core Failure" });

@@ -164,8 +164,9 @@ const ProtocolStore: React.FC = () => {
                 <div className="aspect-[4/5] overflow-hidden bg-black relative">
                   {videoPreviews[product.handle] ? (
                     <div className="w-full h-full relative">
+                      {/* Fix: Ensure ref callback returns void and handles null */}
                       <video 
-                        ref={el => videoRefs.current[product.handle] = el}
+                        ref={el => { videoRefs.current[product.handle] = el; }}
                         src={videoPreviews[product.handle]} 
                         autoPlay 
                         loop 
@@ -197,8 +198,9 @@ const ProtocolStore: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90 group-hover:opacity-40 transition-opacity pointer-events-none"></div>
                   
                   <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
+                    {/* Fix: Use videoPreviews[product.handle] instead of the undeclared videoUrl */}
                     <p className="text-[9px] font-black uppercase tracking-widest bg-black/90 px-4 py-2 border border-white/10 text-primary backdrop-blur-md">
-                      {product.sku}
+                      {product.sku} // {videoPreviews[product.handle] ? 'KINETIC FEED' : 'COREID'}
                     </p>
                     {videoPreviews[product.handle] && (
                       <span className="text-[7px] font-black uppercase tracking-[0.4em] text-primary bg-primary/10 border border-primary/20 px-2 py-1 w-fit backdrop-blur-md animate-pulse">

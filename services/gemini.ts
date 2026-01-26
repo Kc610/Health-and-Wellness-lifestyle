@@ -201,8 +201,12 @@ export const analyzeBiometrics = async (base64Image: string) => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [
-        { inlineData: { mimeType: "image/jpeg", data: base64Image } },
-        { text: "Analyze this human specimen for vitality potential. Provide JSON stats." }
+        {
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: base64Image } },
+            { text: "Analyze this human specimen for vitality potential. Provide JSON stats." }
+          ]
+        }
       ],
       config: {
         responseMimeType: "application/json",

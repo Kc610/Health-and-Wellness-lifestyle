@@ -53,19 +53,9 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
   }, [isVoiceEnabled]);
 
   const speakMessage = async (text: string) => {
-    if (!isVoiceEnabled) return;
+    // This function is only for playing text-based responses when voice input is NOT enabled.
+    // When voice input is enabled, the Live API handles model audio responses directly.
     try {
-      // If Live API session is active, let it handle audio output
-      if (liveSessionRef.current) {
-        // We're not explicitly sending text for the model to speak via liveSessionRef.current in this block,
-        // as the model's audio response in a Live session will be handled by the onmessage callback.
-        // This function (`speakMessage`) is used for non-Live session text-to-speech.
-        // If we are in a live session, we should stop existing local playback.
-        outputAudioSourcesRef.current.forEach(s => s.stop());
-        outputAudioSourcesRef.current.clear();
-        nextOutputAudioStartTime.current = 0;
-      }
-      
       if (currentAudioSource.current) currentAudioSource.current.stop();
       const playback = await speakProtocol(text);
       if (playback) {
@@ -109,7 +99,7 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
         callbacks: {
           onopen: () => {
             console.log('Live session opened');
-            // If the model is speaking, stop it when user starts input
+            // If the model is speaking from a non-live session, stop it when user starts input
             if (currentAudioSource.current) {
               currentAudioSource.current.stop();
               currentAudioSource.current = null;
@@ -132,7 +122,6 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
                 // Send to chat for model response
                 try {
                   if (!chatRef.current) chatRef.current = createOptimizationChat();
-                  let fullResponse = '';
                   // Sending a text message will typically interrupt the current live session's model output and restart it.
                   liveSessionRef.current?.sendRealtimeInput({ text: fullInputText }); // Send user message via Live API too
                   
@@ -266,7 +255,10 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
         });
       }
       sounds.playBlip();
-      speakMessage(fullResponse);
+      // Only speak message aloud if voice input is NOT enabled.
+      if (!isVoiceEnabled) {
+          speakMessage(fullResponse);
+      }
     } catch (error) {
       console.error("Agent error:", error);
       setMessages(prev => [...prev, { role: 'model', text: "Communication link unstable. Resetting neural node...", timestamp: new Date() }]);

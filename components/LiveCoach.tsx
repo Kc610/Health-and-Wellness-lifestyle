@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { sounds } from '../services/ui-sounds';
@@ -20,7 +21,8 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
 
   const startSession = async () => {
     setStatus('CONNECTING');
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Fix: Removed fallback `|| ''` from API_KEY as it's guaranteed to be available.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const inputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
     const outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
