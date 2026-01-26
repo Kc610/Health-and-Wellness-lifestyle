@@ -6,14 +6,25 @@ import App from './App';
 // Polyfill 'global' for libraries expecting a Node-like environment
 (window as any).global = window;
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
-}
+const init = () => {
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    // If the element isn't found, we log it and retry once if needed or just bail gracefully
+    console.error("Critical Failure: Mount point 'root' not found in DOM.");
+    return;
+  }
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+};
+
+// Use DOMContentLoaded to ensure the HTML is parsed before looking for #root
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

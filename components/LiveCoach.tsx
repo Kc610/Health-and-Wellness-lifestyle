@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { sounds } from '../services/ui-sounds';
 import { UserProfile } from '../types';
+import { decodeBase64, decodeAudioData, encodeBytesToBase64, createAudioInputBlob } from '../services/gemini';
 
 interface Props {
   onClose: () => void;
@@ -17,36 +17,6 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
   const sessionRef = useRef<any>(null);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
-  // Base64 Helpers
-  const encode = (bytes: Uint8Array) => {
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-  };
-
-  const decode = (base64: string) => {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes;
-  };
-
-  const decodeAudioData = async (data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> => {
-    const dataInt16 = new Int16Array(data.buffer);
-    const frameCount = dataInt16.length / numChannels;
-    const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
-    for (let channel = 0; channel < numChannels; channel++) {
-      const channelData = buffer.getChannelData(channel);
-      for (let i = 0; i < frameCount; i++) {
-        channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
-      }
-    }
-    return buffer;
-  };
 
   const startSession = async () => {
     setStatus('CONNECTING');
@@ -79,15 +49,7 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
             
             scriptProcessor.onaudioprocess = (e) => {
               const inputData = e.inputBuffer.getChannelData(0);
-              const l = inputData.length;
-              const int16 = new Int16Array(l);
-              for (let i = 0; i < l; i++) {
-                int16[i] = inputData[i] * 32768;
-              }
-              const pcmBlob = {
-                data: encode(new Uint8Array(int16.buffer)),
-                mimeType: 'audio/pcm;rate=16000',
-              };
+              const pcmBlob = createAudioInputBlob(inputData);
               sessionPromise.then(session => session.sendRealtimeInput({ media: pcmBlob }));
             };
 
@@ -108,7 +70,7 @@ const LiveCoach: React.FC<Props> = ({ onClose, profile }) => {
             if (audioData) {
               setIsSpeaking(true);
               nextStartTime.current = Math.max(nextStartTime.current, outputAudioContext.currentTime);
-              const buffer = await decodeAudioData(decode(audioData), outputAudioContext, 24000, 1);
+              const buffer = await decodeAudioData(decodeBase64(audioData), outputAudioContext, 24000, 1);
               const source = outputAudioContext.createBufferSource();
               source.buffer = buffer;
               source.connect(outputAudioContext.destination);

@@ -17,6 +17,7 @@ import VideoAnalyzer from './components/VideoAnalyzer';
 import Footer from './components/Footer';
 import { sounds } from './services/ui-sounds';
 import { loadingTracker } from './services/loading';
+import { speakProtocol } from './services/gemini';
 import { UserProfile } from './types';
 
 const INITIAL_PROFILE: UserProfile = {
@@ -26,6 +27,14 @@ const INITIAL_PROFILE: UserProfile = {
   activityLevel: 'moderate',
   goals: ''
 };
+
+const CALIBRATION_STEPS = [
+  "Initializing Neural Link...",
+  "Calibrating Biometric Hub...",
+  "Syncing DNA Helix v4.0...",
+  "Verifying Collective Clearance...",
+  "Pulse State: Optimal."
+];
 
 const MainLayout: React.FC<{ 
   toggleAssistant: () => void; 
@@ -93,10 +102,30 @@ const App: React.FC = () => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+  const [calibrationIdx, setCalibrationIdx] = useState(0);
+  const [isCalibrating, setIsCalibrating] = useState(true);
+
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('bio_baseline');
     return saved ? JSON.parse(saved) : INITIAL_PROFILE;
   });
+
+  useEffect(() => {
+    if (!isInitialized) {
+      const interval = setInterval(() => {
+        setCalibrationIdx(prev => {
+          if (prev >= CALIBRATION_STEPS.length - 1) {
+            clearInterval(interval);
+            setIsCalibrating(false);
+            return prev;
+          }
+          sounds.playBlip();
+          return prev + 1;
+        });
+      }, 1200);
+      return () => clearInterval(interval);
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     return loadingTracker.subscribe((loading) => {
@@ -104,9 +133,21 @@ const App: React.FC = () => {
     });
   }, []);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     sounds.playInject();
     setIsInitialized(true);
+    // Voice Greeting
+    try {
+      const welcomeText = userProfile.goals 
+        ? `Welcome back to the Collective. Neural link optimized for your ${userProfile.goals} protocols.`
+        : "Neural link established. Welcome to Hello Healthy. Baseline profile pending.";
+      const audio = await speakProtocol(welcomeText);
+      if (audio) {
+        audio.source.start(0);
+      }
+    } catch (e) {
+      console.warn("Voice greeting failed");
+    }
     setIsCoachOpen(true);
   };
 
@@ -135,26 +176,59 @@ const App: React.FC = () => {
         </div>
 
         {!isInitialized && (
-          <div className="fixed inset-0 z-[500] bg-black flex flex-col items-center justify-center p-8">
-            <div className="max-w-md w-full text-center space-y-12">
-              <div className="relative size-32 mx-auto flex items-center justify-center">
-                <div className="absolute inset-0 border-2 border-primary/20 rounded-full animate-ping"></div>
-                <div className="absolute inset-2 border-2 border-primary animate-pulse-slow rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary text-5xl">favorite</span>
+          <div className="fixed inset-0 z-[500] bg-black flex flex-col items-center justify-center p-8 overflow-hidden">
+            {/* Visual Depth for Opening */}
+            <div className="absolute inset-0 opacity-10">
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#00FF7F22_0%,_transparent_70%)] animate-pulse-slow"></div>
+               <div className="scanlines absolute inset-0"></div>
+            </div>
+
+            <div className="max-w-xl w-full text-center space-y-16 relative z-10">
+              <div className="relative size-48 mx-auto flex items-center justify-center">
+                <div className="absolute inset-0 border-2 border-primary/20 rounded-full animate-ping-slow"></div>
+                <div className="absolute inset-4 border border-primary/40 rounded-full animate-[spin_10s_linear_infinite]">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 size-3 bg-primary rounded-full shadow-[0_0_15px_#00FF7F]"></div>
+                </div>
+                <div className="absolute inset-8 border-2 border-primary animate-pulse-slow rounded-full flex items-center justify-center bg-black/50 backdrop-blur-xl">
+                  <span className="material-symbols-outlined text-primary text-6xl">sensors</span>
                 </div>
               </div>
-              <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white">
-                Initialize <span className="text-primary italic">Pulse Sync</span>
-              </h2>
-              <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-[0.4em]">
-                Stabilizing vitality markers... link state optimal.
-              </p>
+
+              <div className="space-y-6">
+                <h2 className="font-display text-5xl font-black uppercase tracking-tighter text-white">
+                  Initialize <span className="text-primary italic">Pulse Sync</span>
+                </h2>
+                <div className="h-20 flex flex-col items-center justify-center gap-2">
+                   <p className="font-mono text-[11px] text-primary uppercase tracking-[0.5em] animate-pulse">
+                      {CALIBRATION_STEPS[calibrationIdx]}
+                   </p>
+                   <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-1000 ease-out shadow-[0_0_10px_#00FF7F]" 
+                        style={{ width: `${((calibrationIdx + 1) / CALIBRATION_STEPS.length) * 100}%` }}
+                      ></div>
+                   </div>
+                </div>
+              </div>
+
               <button 
                 onClick={handleStart}
-                className="w-full bg-primary text-black py-6 font-black text-sm tracking-[0.3em] uppercase hover:bg-white transition-all transform active:scale-95 shadow-[0_0_30px_rgba(0,255,127,0.2)]"
+                disabled={isCalibrating}
+                className={`w-full py-8 font-black text-sm tracking-[0.4em] uppercase transition-all transform active:scale-95 shadow-[0_0_50px_rgba(0,255,127,0.1)] border-2 ${isCalibrating ? 'border-white/5 text-neutral-800' : 'bg-primary border-primary text-black hover:bg-white hover:border-white shadow-[0_0_30px_rgba(0,255,127,0.3)]'}`}
               >
-                Sync Pulse
+                {isCalibrating ? 'Calibrating Hardware...' : 'Engage Neural Link'}
               </button>
+              
+              <div className="flex justify-center gap-8 opacity-40">
+                <div className="flex items-center gap-2">
+                  <span className="size-1.5 bg-primary rounded-full animate-pulse"></span>
+                  <span className="text-[9px] font-mono text-white tracking-widest uppercase">Biometrics OK</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="size-1.5 bg-primary rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                  <span className="text-[9px] font-mono text-white tracking-widest uppercase">Grid Linked</span>
+                </div>
+              </div>
             </div>
           </div>
         )}

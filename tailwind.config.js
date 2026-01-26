@@ -1,4 +1,3 @@
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -10,10 +9,10 @@ export default {
     extend: {
       colors: {
         "primary": "#00FF7F",
-        "background-dark": "#050505",
-        "surface-dark": "#121212",
+        "background-dark": "#010101", // Updated for consistency
+        "surface-dark": "#080808",   // Updated for consistency
         "safety-orange": "#FF8C00",
-        "interface-gray": "#262626",
+        "interface-gray": "#0f0f0f", // Updated for consistency
       },
       fontFamily: {
         "display": ["Space Grotesk", "sans-serif"],

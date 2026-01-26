@@ -1,9 +1,9 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../services/products';
 import { sounds } from '../services/ui-sounds';
-import { generateProductVideo, NeuralLinkError } from '../services/gemini';
+import { generateProductVideo, NeuralLinkError, speakProtocol } from '../services/gemini';
 
 const CATEGORIES = [
   "ALL SECTORS",
@@ -18,11 +18,15 @@ const ProtocolStore: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState("ALL SECTORS");
 
-  // Video State Management
+  // Video/Voice State Management
   const [videoPreviews, setVideoPreviews] = useState<Record<string, string>>({});
   const [loadingVideos, setLoadingVideos] = useState<Record<string, boolean>>({});
+  const [loadingVoice, setLoadingVoice] = useState<Record<string, boolean>>({});
   const [videoStatus, setVideoStatus] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pausedVideos, setPausedVideos] = useState<Record<string, boolean>>({});
+  
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter(product => {
@@ -43,8 +47,25 @@ const ProtocolStore: React.FC = () => {
     navigate(`/protocol/${handle}`);
   };
 
+  const handleSpeakProtocol = async (e: React.MouseEvent, product: any) => {
+    e.stopPropagation();
+    if (loadingVoice[product.handle]) return;
+
+    sounds.playBlip();
+    setLoadingVoice(prev => ({ ...prev, [product.handle]: true }));
+    try {
+      const audio = await speakProtocol(`Analyzing ${product.title}. ${product.description}`);
+      if (audio) {
+        audio.source.start(0);
+        audio.source.onended = () => setLoadingVoice(prev => ({ ...prev, [product.handle]: false }));
+      }
+    } catch (err) {
+      setLoadingVoice(prev => ({ ...prev, [product.handle]: false }));
+    }
+  };
+
   const handleGenerateVideo = async (e: React.MouseEvent, product: any) => {
-    e.stopPropagation(); // Prevent navigation to detail page
+    e.stopPropagation();
     if (loadingVideos[product.handle]) return;
 
     sounds.playInject();
@@ -56,6 +77,7 @@ const ProtocolStore: React.FC = () => {
         setVideoStatus(prev => ({ ...prev, [product.handle]: status }));
       });
       setVideoPreviews(prev => ({ ...prev, [product.handle]: url }));
+      setPausedVideos(prev => ({ ...prev, [product.handle]: false }));
       sounds.playBlip();
     } catch (err) {
       const msg = err instanceof NeuralLinkError ? err.message : "Video node offline";
@@ -65,9 +87,23 @@ const ProtocolStore: React.FC = () => {
     }
   };
 
+  const togglePlayback = (e: React.MouseEvent, handle: string) => {
+    e.stopPropagation();
+    const video = videoRefs.current[handle];
+    if (video) {
+      if (video.paused) {
+        video.play();
+        setPausedVideos(prev => ({ ...prev, [handle]: false }));
+      } else {
+        video.pause();
+        setPausedVideos(prev => ({ ...prev, [handle]: true }));
+      }
+      sounds.playBlip();
+    }
+  };
+
   return (
     <section id="protocols" className="py-40 bg-background-dark relative">
-      {/* Structural depth lines */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
       
       <div className="max-w-[1440px] mx-auto px-8">
@@ -83,7 +119,6 @@ const ProtocolStore: React.FC = () => {
           </div>
 
           <div className="w-full xl:w-auto space-y-8">
-            {/* Category Navigation Bar */}
             <div className="flex flex-wrap gap-4 border-b border-white/5 pb-8">
               {CATEGORIES.map(cat => (
                 <button
@@ -128,13 +163,28 @@ const ProtocolStore: React.FC = () => {
               >
                 <div className="aspect-[4/5] overflow-hidden bg-black relative">
                   {videoPreviews[product.handle] ? (
-                    <video 
-                      src={videoPreviews[product.handle]} 
-                      autoPlay 
-                      loop 
-                      muted 
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full relative">
+                      <video 
+                        ref={el => videoRefs.current[product.handle] = el}
+                        src={videoPreviews[product.handle]} 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline
+                        className="w-full h-full object-cover transition-opacity duration-500"
+                      />
+                      {/* Play/Pause Button */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button 
+                           onClick={(e) => togglePlayback(e, product.handle)}
+                           className="size-20 bg-black/40 backdrop-blur-md rounded-full border border-primary/40 flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-all transform hover:scale-110 active:scale-95"
+                         >
+                           <span className="material-symbols-outlined text-4xl">
+                             {pausedVideos[product.handle] ? 'play_arrow' : 'pause'}
+                           </span>
+                         </button>
+                      </div>
+                    </div>
                   ) : (
                     <img 
                       src={product.image} 
@@ -144,7 +194,7 @@ const ProtocolStore: React.FC = () => {
                     />
                   )}
                   
-                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90 group-hover:opacity-40 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90 group-hover:opacity-40 transition-opacity pointer-events-none"></div>
                   
                   <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
                     <p className="text-[9px] font-black uppercase tracking-widest bg-black/90 px-4 py-2 border border-white/10 text-primary backdrop-blur-md">
@@ -152,13 +202,13 @@ const ProtocolStore: React.FC = () => {
                     </p>
                     {videoPreviews[product.handle] && (
                       <span className="text-[7px] font-black uppercase tracking-[0.4em] text-primary bg-primary/10 border border-primary/20 px-2 py-1 w-fit backdrop-blur-md animate-pulse">
-                        Live Preview Active
+                        {pausedVideos[product.handle] ? 'Paused' : 'Kinetic Feed'}
                       </span>
                     )}
                   </div>
 
-                  {/* Video Generation Trigger */}
-                  <div className="absolute top-6 right-6 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {/* Top Right Toolbelt */}
+                  <div className="absolute top-6 right-6 z-30 flex flex-col gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button 
                       onClick={(e) => handleGenerateVideo(e, product)}
                       disabled={loadingVideos[product.handle]}
@@ -168,7 +218,20 @@ const ProtocolStore: React.FC = () => {
                         {loadingVideos[product.handle] ? 'sync' : 'movie_filter'}
                       </span>
                       <div className="absolute top-0 right-full mr-4 bg-black border border-primary/30 px-3 py-1 text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden group-hover/vbtn:block text-primary">
-                        {loadingVideos[product.handle] ? 'SYNTHESIZING...' : 'RENDER PREVIEW'}
+                        {loadingVideos[product.handle] ? 'SYNTHESIZING...' : (videoPreviews[product.handle] ? 'RE-RENDER' : 'RENDER PREVIEW')}
+                      </div>
+                    </button>
+
+                    <button 
+                      onClick={(e) => handleSpeakProtocol(e, product)}
+                      disabled={loadingVoice[product.handle]}
+                      className={`size-12 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all group/sbtn border-4 border-black ${loadingVoice[product.handle] ? 'bg-white text-black animate-pulse' : 'bg-neutral-800 text-primary hover:bg-primary hover:text-black'}`}
+                    >
+                      <span className={`material-symbols-outlined text-2xl font-black ${loadingVoice[product.handle] ? 'animate-bounce' : ''}`}>
+                        {loadingVoice[product.handle] ? 'graphic_eq' : 'volume_up'}
+                      </span>
+                      <div className="absolute top-0 right-full mr-4 bg-black border border-primary/30 px-3 py-1 text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden group-hover/sbtn:block text-primary">
+                        {loadingVoice[product.handle] ? 'BROADCASTING...' : 'HEAR PROTOCOL'}
                       </div>
                     </button>
                   </div>
