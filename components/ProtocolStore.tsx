@@ -5,14 +5,6 @@ import { PRODUCTS } from '../services/products';
 import { sounds } from '../services/ui-sounds';
 import { generateProductVideo, NeuralLinkError, speakProtocol } from '../services/gemini';
 
-const CATEGORIES = [
-  "ALL SECTORS",
-  "Amino Acids & Blends",
-  "Proteins & Blends",
-  "Specialty Supplements",
-  "Natural Extracts"
-];
-
 const ProtocolStore: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +19,11 @@ const ProtocolStore: React.FC = () => {
   const [pausedVideos, setPausedVideos] = useState<Record<string, boolean>>({});
   
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+
+  const categories = useMemo(() => {
+    const unique = new Set(PRODUCTS.map(p => p.category).filter(Boolean));
+    return ["ALL SECTORS", ...Array.from(unique)];
+  }, []);
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter(product => {
@@ -120,7 +117,7 @@ const ProtocolStore: React.FC = () => {
 
           <div className="w-full xl:w-auto space-y-8">
             <div className="flex flex-wrap gap-4 border-b border-white/5 pb-8">
-              {CATEGORIES.map(cat => (
+              {categories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => { sounds.playBlip(); setSelectedCategory(cat); }}

@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Logo from './Logo';
 import { sounds } from '../services/ui-sounds';
+import { PRODUCTS } from '../services/products';
 
 interface HeaderProps {
   onOpenAssistant: () => void;
@@ -9,13 +10,6 @@ interface HeaderProps {
   onOpenProfile: () => void;
   onOpenVideo: () => void;
 }
-
-const CATEGORIES = [
-  "Amino Acids & Blends",
-  "Proteins & Blends",
-  "Specialty Supplements",
-  "Natural Extracts"
-];
 
 const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenProfile, onOpenVideo }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -25,6 +19,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenPro
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const categories = useMemo(() => {
+    return Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean)));
   }, []);
 
   const scrollToProtocols = () => {
@@ -59,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenAssistant, onOpenCoach, onOpenPro
               className={`absolute top-full left-0 w-80 bg-neutral-900 border border-white/10 p-8 shadow-[0_40px_80px_rgba(0,0,0,1)] transition-all duration-500 ${menuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
             >
               <div className="space-y-6">
-                {CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <button 
                     key={cat}
                     onClick={scrollToProtocols}
