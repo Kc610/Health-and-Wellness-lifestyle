@@ -9,6 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Polyfill API_KEY if GEMINI_API_KEY is present but API_KEY is not
+if (!process.env.API_KEY && process.env.GEMINI_API_KEY) {
+  process.env.API_KEY = process.env.GEMINI_API_KEY;
+}
+
 // Initialize GoogleGenAI with named parameter apiKey
 const genAI = new GoogleGenAI({apiKey: process.env.API_KEY});
 
