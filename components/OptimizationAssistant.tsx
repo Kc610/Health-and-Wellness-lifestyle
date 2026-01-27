@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, LiveSession, LiveServerMessage, Modality } from '@google/genai';
+import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { createOptimizationChat, speakProtocol, createAudioInputBlob, decodeBase64, decodeAudioData } from '../services/gemini';
 import { ChatMessage } from '../types';
 import { sounds } from '../services/ui-sounds';
@@ -22,7 +22,7 @@ const OptimizationAssistant: React.FC<Props> = ({ onClose }) => {
   const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
   // Live API refs for voice input
-  const liveSessionRef = useRef<LiveSession | null>(null);
+  const liveSessionRef = useRef<any>(null);
   const inputAudioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);

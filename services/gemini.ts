@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality, Blob } from "@google/genai";
 import { loadingTracker } from "./loading";
 
@@ -30,6 +31,17 @@ const safeParseJson = (text: string | undefined) => {
     return null;
   }
 };
+
+/**
+ * Validates presence of API Key.
+ */
+const getAiClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey.includes("your-api-key")) {
+    throw new NeuralLinkError("Neural link severed. Authorization key missing.", "AUTH_FAIL");
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 /**
  * PCM Audio Decoding utilities (for model output)
@@ -84,8 +96,8 @@ export const createAudioInputBlob = (data: Float32Array): Blob => {
 
 export const speakProtocol = async (text: string) => {
   loadingTracker.start();
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text: `Read this vitality protocol intel with focused, elite authority: ${text}` }] }],
@@ -119,8 +131,8 @@ export const speakProtocol = async (text: string) => {
 
 export const generateOptimizationLogs = async () => {
   loadingTracker.start();
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [{ parts: [{ text: "Generate exactly 4 high-performance vitality optimization logs for a futuristic training collective dashboard. Return only valid JSON." }] }],
@@ -149,6 +161,7 @@ export const generateOptimizationLogs = async () => {
     if (!parsed || !Array.isArray(parsed)) throw new Error("Malformed grid data");
     return parsed;
   } catch (err) {
+    if (err instanceof NeuralLinkError) throw err;
     throw new NeuralLinkError("Collective Intelligence Pulse timed out. Biological logs inaccessible.", "GRID_SYNC_FAIL");
   } finally {
     loadingTracker.end();
@@ -157,8 +170,8 @@ export const generateOptimizationLogs = async () => {
 
 export const generateProductIntel = async (productTitle: string, baseDescription: string) => {
   loadingTracker.start();
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [{ parts: [{ text: `Generate a high-tech "Vitality Intel Report" for: ${productTitle}. Info: ${baseDescription}. Use cold, futuristic terminology.` }] }],
@@ -173,8 +186,8 @@ export const generateProductIntel = async (productTitle: string, baseDescription
 
 export const generateIntelLeaks = async () => {
   loadingTracker.start();
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [{ parts: [{ text: "Generate 10 cryptic 'vitality leaks' for a ticker. Return as JSON array of strings." }] }],
@@ -188,7 +201,19 @@ export const generateIntelLeaks = async () => {
     });
     return safeParseJson(response.text) || ["PULSE STABLE"];
   } catch (err) {
-    return ["LINK STABLE"];
+    // Return robust static fallback to keep UI dynamic even on auth failure
+    return [
+      "LINK ESTABLISHED: NODE A-1",
+      "BIOMETRIC DECRYPTION: ACTIVE",
+      "NEURAL SYNC: 98.4%",
+      "OPTIMIZATION PROTOCOL: ENGAGED",
+      "VITALITY STREAMS: SECURE",
+      "LATENCY: 0.002MS",
+      "COLLECTIVE PULSE: STEADY",
+      "HARDWARE AUDIT: COMPLETE",
+      "BUFFERING KINETIC DATA...",
+      "SYSTEM STATUS: OPTIMAL"
+    ];
   } finally {
     loadingTracker.end();
   }
@@ -196,8 +221,8 @@ export const generateIntelLeaks = async () => {
 
 export const analyzeBiometrics = async (base64Image: string) => {
   loadingTracker.start();
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [
@@ -232,8 +257,8 @@ export const analyzeBiometrics = async (base64Image: string) => {
 
 export const analyzeVideoKinetic = async (frames: string[]) => {
   loadingTracker.start();
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    const ai = getAiClient();
     const parts = [
       ...frames.map(data => ({ inlineData: { mimeType: "image/jpeg", data } })),
       { text: "Analyze this kinetic sequence. Provide a 'VITALITY PERFORMANCE AUDIT'." }
@@ -267,10 +292,10 @@ export const generateProductVideo = async (productTitle: string, onStatusUpdate?
     }
   }
 
-  // Create fresh instance to ensure up-to-date key
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
   try {
+    // Create fresh instance to ensure up-to-date key
+    const ai = getAiClient();
+
     if (onStatusUpdate) onStatusUpdate("Initializing Veo Render Node...");
     let operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
@@ -318,7 +343,7 @@ export const generateProductVideo = async (productTitle: string, onStatusUpdate?
 };
 
 export const createOptimizationChat = () => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAiClient();
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {

@@ -103,6 +103,8 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  const galleryImages = product.gallery?.filter(img => img !== product.image) || [];
+
   return (
     <div className="min-h-screen bg-background-dark text-white pt-32 pb-20 selection:bg-primary selection:text-black">
       <div className="max-w-7xl mx-auto px-8">
@@ -171,6 +173,27 @@ const ProductDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {/* Visual Recon Gallery - Hotlinked from HTML content */}
+            {galleryImages.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-500 border-b border-white/10 pb-4">
+                  Visual Recon Artifacts
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  {galleryImages.map((img, idx) => (
+                    <div key={idx} className="aspect-square bg-white/5 border border-white/10 overflow-hidden relative group cursor-pointer">
+                      <img 
+                        src={img} 
+                        alt={`Artifact ${idx}`}
+                        className="w-full h-full object-contain p-4 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                      />
+                      <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Information & AI */}
